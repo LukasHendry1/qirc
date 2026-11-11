@@ -1,0 +1,12 @@
+# depthai_ros_driver parameters for the rear OAK-D Lite.
+# Full parameter list: https://docs.luxonis.com/software/ros/depthai-ros/driver/
+/**:
+  ros__parameters:
+    camera:
+      i_pipeline_type: RGBD   # RGB + stereo depth
+      i_nn_type: spatial      # on-camera detection with 3D position
+      i_enable_ir: false      # OAK-D Lite has no IR projector/flood light
+      i_enable_imu: false     # not all OAK-D Lite revisions have an IMU
+    nn:
+      # Stock MobileNet-SSD (VOC classes, includes "person").
+      i_nn_config_path: depthai_ros_driver/mobilenet
