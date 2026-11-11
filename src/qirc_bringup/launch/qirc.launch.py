@@ -6,6 +6,8 @@ Arguments:
         Set to false when developing without the camera plugged in.
     use_rear_camera (default true): start the rear OAK-D Lite driver.
         Set to false when developing without the camera plugged in.
+    use_lidar (default true): start the RPLidar driver.
+        Set to false when developing without the LiDAR plugged in.
 """
 
 from launch import LaunchDescription
@@ -42,6 +44,12 @@ def generate_launch_description():
         ])),
         condition=IfCondition(LaunchConfiguration('use_rear_camera')),
     )
+    lidar = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(PathJoinSubstitution([
+            FindPackageShare('qirc_localization'), 'launch', 'lidar.launch.py',
+        ])),
+        condition=IfCondition(LaunchConfiguration('use_lidar')),
+    )
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -50,7 +58,11 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_rear_camera', default_value='true',
             description='Start the rear OAK-D Lite driver (false if no camera attached)'),
+        DeclareLaunchArgument(
+            'use_lidar', default_value='true',
+            description='Start the RPLidar driver (false if no LiDAR attached)'),
         front_camera,
         rear_camera,
+        lidar,
         *[Node(package=pkg, executable=exe, output='screen') for pkg, exe in NODES],
     ])

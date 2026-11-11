@@ -1,0 +1,11 @@
+# rplidar_ros (Slamtec) parameters for the RPLidar.
+# serial_port and serial_baudrate are set as launch arguments in
+# launch/lidar.launch.py so they can be changed without editing this file.
+/**:
+  ros__parameters:
+    channel_type: serial
+    frame_id: laser          # TODO: attach to base_link in the URDF
+    inverted: false
+    angle_compensate: true
+    # Empty = use the model's default scan mode (Standard / Sensitivity / ...).
+    scan_mode: ''

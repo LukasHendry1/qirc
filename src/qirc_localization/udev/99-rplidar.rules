@@ -1,0 +1,9 @@
+# Gives the RPLidar a fixed device name: /dev/rplidar (instead of /dev/ttyUSB0, 1, ...).
+# Matches the Silicon Labs CP210x USB-serial adapter that RPLidars use. Note that
+# other devices with the same adapter chip will also match this rule.
+#
+# Install (once per machine):
+#   sudo cp 99-rplidar.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+#   (then replug the LiDAR and check: ls -l /dev/rplidar)
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0666", SYMLINK+="rplidar"

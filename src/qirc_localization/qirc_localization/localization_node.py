@@ -1,7 +1,11 @@
 """Estimates the robot pose within the house map."""
 
+import math
+
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
+from sensor_msgs.msg import LaserScan
 
 
 class LocalizationNode(Node):
@@ -9,7 +13,7 @@ class LocalizationNode(Node):
     Estimates the robot pose within the house map.
 
     Inputs:
-        - LiDAR scan
+        - LiDAR scan: /scan
         - House map
 
     Outputs:
@@ -18,7 +22,20 @@ class LocalizationNode(Node):
 
     def __init__(self):
         super().__init__('localization')
+        self.scan_sub = self.create_subscription(
+            LaserScan, 'scan', self.scan_callback, qos_profile_sensor_data)
         self.get_logger().info('localization started')
+
+    def scan_callback(self, msg):
+        valid = [
+            r for r in msg.ranges
+            if math.isfinite(r) and msg.range_min <= r <= msg.range_max
+        ]
+        closest = f'{min(valid):.2f} m' if valid else 'n/a'
+        self.get_logger().info(
+            f'scan: {len(valid)}/{len(msg.ranges)} valid points, closest {closest}',
+            throttle_duration_sec=2.0,
+        )
 
 
 def main(args=None):
