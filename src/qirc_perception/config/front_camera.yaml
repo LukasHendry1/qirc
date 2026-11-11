@@ -1,0 +1,22 @@
+# realsense2_camera parameters for the front Intel RealSense (D400 series).
+# Full parameter list: https://github.com/IntelRealSense/realsense-ros#parameters
+/**:
+  ros__parameters:
+    # 640x480 @ 30 fps is supported by every D400 model; raise once the
+    # exact model is known (e.g. 848x480 or 1280x720).
+    rgb_camera:
+      color_profile: '640,480,30'
+    depth_module:
+      depth_profile: '640,480,30'
+      # D405 only: its color stream comes from the depth module, so use
+      # depth_module.color_profile instead of rgb_camera.color_profile.
+
+    # Publish depth aligned to the color image, so a pixel in a color-image
+    # detection maps directly to a depth value (3D position of the detection).
+    align_depth:
+      enable: true
+
+    # IMU: only on D435i / D455 (and other "i" models). Enable if present.
+    enable_gyro: false
+    enable_accel: false
+    unite_imu_method: 0   # set to 2 (linear interpolation) when enabling the IMU
