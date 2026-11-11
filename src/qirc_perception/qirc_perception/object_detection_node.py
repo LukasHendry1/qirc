@@ -11,7 +11,7 @@ class ObjectDetectionNode(Node):
     Detects objects and the user from the front and back camera images.
 
     Inputs:
-        - Front camera image (RealSense): /front_camera/color/image_raw
+        - Front camera image (RealSense D435i): /front_camera/color/image_raw
         - Rear camera image (OAK-D Lite): /rear_camera/rgb/image_raw
 
     Outputs:
