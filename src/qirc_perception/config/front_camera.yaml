@@ -1,0 +1,23 @@
+# realsense2_camera parameters for the front Intel RealSense D435i.
+# Full parameter list: https://github.com/IntelRealSense/realsense-ros#parameters
+/**:
+  ros__parameters:
+    # 848x480 is Intel's recommended depth resolution for the D435 family
+    # (best depth quality per pixel). 30 fps keeps USB bandwidth reasonable
+    # while sharing the bus with the rear OAK-D Lite.
+    rgb_camera:
+      color_profile: '848,480,30'
+    depth_module:
+      depth_profile: '848,480,30'
+
+    # Publish depth aligned to the color image, so a pixel in a color-image
+    # detection maps directly to a depth value (3D position of the detection).
+    align_depth:
+      enable: true
+
+    # D435i built-in IMU (Bosch BMI055). unite_imu_method 2 (linear
+    # interpolation) combines gyro + accel into one sensor_msgs/Imu topic:
+    # /front_camera/imu. gyro_fps / accel_fps are left at the driver default.
+    enable_gyro: true
+    enable_accel: true
+    unite_imu_method: 2

@@ -1,0 +1,382 @@
+# QIRC power distribution (draft)
+#
+# Render: pip install wireviz && wireviz docs/wiring/power.yml
+# Assumes a 24 V system: 8S LiFePO4 battery, E-S Motor 36PG 24 V drive
+# motors, JGB37-520 24 V arm motors. Items marked TBD are still undecided.
+
+metadata:
+  title: QIRC power distribution (draft, 24 V)
+
+options:
+  bgcolor: WH
+  color_mode: full
+
+templates:
+  - &red_black
+    wirecount: 2
+    colors: [RD, BK]
+  - &bus
+    type: Bus bar / terminal block
+
+connectors:
+  # --- Source and protection ---------------------------------------------
+  BAT:
+    type: Battery, 8S LiFePO4
+    subtype: 25.6 V nominal (20-29.2 V), 10 Ah (256 Wh)
+    pinlabels: [B+, B-]
+    notes: XT60 or XT90; BMS rated 40 A continuous or more
+  F1:
+    type: Main fuse + holder
+    subtype: 40 A (ATO/MIDI)
+    pinlabels: [IN, OUT]
+  SW1:
+    type: Main power switch
+    subtype: Rated 40 A DC or more
+    pinlabels: [IN, OUT]
+  ES1:
+    type: E-stop (latching, normally closed)
+    subtype: Cuts the motor rail only, rated 40 A DC or more
+    pinlabels: [IN, OUT]
+
+  # --- Distribution ------------------------------------------------------
+  BUS_24V:
+    <<: *bus
+    subtype: Unswitched 24 V (after main switch)
+    pinlabels: [IN, TO_E-STOP, TO_19V, TO_5V]
+  BUS_MOT:
+    <<: *bus
+    subtype: Motor rail 24 V (after E-stop)
+    pinlabels: [IN, DRIVE_L, DRIVE_R, ARM, STEP_1, STEP_2, LIGHTS]
+  BUS_GND:
+    <<: *bus
+    subtype: Common ground
+    pinlabels: [BAT, DRIVE_L, DRIVE_R, ARM, STEP_1, STEP_2, LIGHTS, 19V, 5V]
+
+  # --- Regulators and computer -------------------------------------------
+  DC19:
+    type: DC-DC buck-boost
+    subtype: 20-30 V in, 19 V out, 40 W min
+    pinlabels: [IN+, IN-, OUT+, OUT-]
+    notes: Keeps the Jetson stable when motors dip the battery
+  DC5:
+    type: DC-DC buck
+    subtype: 20-30 V in, 5 V out, 3 A min
+    pinlabels: [IN+, IN-, OUT+, OUT-]
+  JETSON:
+    type: Jetson Orin Nano dev kit
+    pinlabels: [DC_IN+, DC_IN-, USB-A 1, USB-A 2, USB-A 3, USB-A 4]
+    notes: DC barrel jack, 19 V nominal
+
+  # --- USB devices (5 V from the Jetson) ---------------------------------
+  CAM_F:
+    type: RealSense D435i (front)
+    pinlabels: [USB-C]
+  CAM_R:
+    type: OAK-D Lite (rear)
+    pinlabels: [USB-C]
+  LIDAR:
+    type: RPLidar A2M8
+    pinlabels: [USB]
+    notes: Via its USB adapter; use the adapter's aux power port if the motor won't spin up
+  PICO:
+    type: Raspberry Pi Pico (RP2040)
+    pinlabels: [Micro-USB]
+    notes: Signal wiring in a separate diagram (pin map TBD)
+
+  # --- Drive ---------------------------------------------------------------
+  MD_L:
+    type: Cytron MD10C (drive left)
+    subtype: 5-30 V, 13 A continuous, 30 A peak
+    pinlabels: [POWER+, POWER-, MA, MB]
+    notes: Motor stall (21 A) exceeds 13 A continuous; limit in firmware
+  MD_R:
+    type: Cytron MD10C (drive right)
+    subtype: 5-30 V, 13 A continuous, 30 A peak
+    pinlabels: [POWER+, POWER-, MA, MB]
+    notes: Motor stall (21 A) exceeds 13 A continuous; limit in firmware
+  M_L:
+    type: Drive motor left
+    subtype: E-S Motor 36PG 555K, 24 V, 120 RPM, 2.6 A rated, 21 A stall
+    pinlabels: [M+, M-]
+    notes: No encoder (encoder solution TBD)
+  M_R:
+    type: Drive motor right
+    subtype: E-S Motor 36PG 555K, 24 V, 120 RPM, 2.6 A rated, 21 A stall
+    pinlabels: [M+, M-]
+    notes: No encoder (encoder solution TBD)
+
+  # --- Arm -----------------------------------------------------------------
+  AD:
+    type: Cytron MDD10A (arm, dual channel)
+    subtype: 5-30 V, 10 A per channel
+    pinlabels: [B+, B-, M1A, M1B, M2A, M2B]
+    notes: Same PWM + DIR interface as the MD10C
+  AM_1:
+    type: Arm motor 1
+    subtype: JGB37-520, 24 V, 10 W
+    pinlabels: [M+, M-]
+    notes: Hall encoder (if fitted) wires to the Pico
+  AM_2:
+    type: Arm motor 2
+    subtype: JGB37-520, 24 V, 10 W
+    pinlabels: [M+, M-]
+    notes: Hall encoder (if fitted) wires to the Pico
+
+  # --- Dispenser -----------------------------------------------------------
+  DRV_1:
+    type: DRV8825 (dispenser 1)
+    pinlabels: [VMOT, GND, A1, A2, B1, B2]
+    notes: 100 uF 50 V cap across VMOT-GND; current limit 1.2-1.5 A
+  DRV_2:
+    type: DRV8825 (dispenser 2)
+    pinlabels: [VMOT, GND, A1, A2, B1, B2]
+    notes: 100 uF 50 V cap across VMOT-GND; current limit 1.2-1.5 A
+  ST_1:
+    type: NEMA 17 stepper (dispenser 1)
+    pinlabels: [A+, A-, B+, B-]
+  ST_2:
+    type: NEMA 17 stepper (dispenser 2)
+    pinlabels: [A+, A-, B+, B-]
+
+  # --- Lights --------------------------------------------------------------
+  MOSFET:
+    type: Logic-level MOSFET module (headlights)
+    pinlabels: [VIN+, VIN-, OUT+, OUT-]
+    notes: PWM gate signal from Pico (signal diagram)
+  HEAD:
+    type: Headlights (12-24 V LED)
+    pinlabels: [+, '-']
+  LEDS:
+    type: WS2812B status LEDs
+    pinlabels: [5V, GND]
+    notes: Data line from Pico (signal diagram)
+
+cables:
+  # Main path: battery -> fuse -> switch -> 24 V bus -> E-stop -> motor bus
+  W_BAT:
+    <<: *red_black
+    gauge: 12 AWG
+  W_F:
+    wirecount: 1
+    colors: [RD]
+    gauge: 12 AWG
+  W_SW:
+    wirecount: 1
+    colors: [RD]
+    gauge: 12 AWG
+  W_ES_IN:
+    wirecount: 1
+    colors: [RD]
+    gauge: 12 AWG
+  W_ES_OUT:
+    wirecount: 1
+    colors: [RD]
+    gauge: 12 AWG
+
+  # Feeds from the buses
+  W_MD_L:
+    <<: *red_black
+    gauge: 14 AWG
+  W_MD_R:
+    <<: *red_black
+    gauge: 14 AWG
+  W_AD:
+    <<: *red_black
+    gauge: 18 AWG
+  W_DRV_1:
+    <<: *red_black
+    gauge: 18 AWG
+  W_DRV_2:
+    <<: *red_black
+    gauge: 18 AWG
+  W_MOSFET:
+    <<: *red_black
+    gauge: 18 AWG
+  W_DC19_IN:
+    <<: *red_black
+    gauge: 18 AWG
+  W_DC5_IN:
+    <<: *red_black
+    gauge: 20 AWG
+
+  # Regulator outputs
+  W_JETSON:
+    <<: *red_black
+    gauge: 16 AWG
+    notes: DC barrel plug (check carrier board size)
+  W_LEDS:
+    <<: *red_black
+    gauge: 20 AWG
+
+  # Motor leads
+  W_M_L:
+    <<: *red_black
+    gauge: 14 AWG
+    notes: Solder or crimp to the motor's copper tabs
+  W_M_R:
+    <<: *red_black
+    gauge: 14 AWG
+    notes: Solder or crimp to the motor's copper tabs
+  W_AM_1:
+    <<: *red_black
+    gauge: 20 AWG
+  W_AM_2:
+    <<: *red_black
+    gauge: 20 AWG
+  W_ST_1:
+    wirecount: 4
+    colors: [BK, GN, RD, BU]
+    gauge: 22 AWG
+    notes: Check coil pairs on the motor datasheet
+  W_ST_2:
+    wirecount: 4
+    colors: [BK, GN, RD, BU]
+    gauge: 22 AWG
+    notes: Check coil pairs on the motor datasheet
+  W_HEAD:
+    <<: *red_black
+    gauge: 20 AWG
+
+  # USB
+  USB_F:
+    category: bundle
+    type: USB 3 cable (A to C)
+    wirecount: 1
+    colors: [BU]
+  USB_R:
+    category: bundle
+    type: USB 3 cable (A to C)
+    wirecount: 1
+    colors: [BU]
+  USB_L:
+    category: bundle
+    type: USB cable (LiDAR adapter)
+    wirecount: 1
+    colors: [BK]
+  USB_P:
+    category: bundle
+    type: USB cable (A to Micro-USB)
+    wirecount: 1
+    colors: [BK]
+
+connections:
+  # Battery: + through the fuse, - to the ground bus
+  - - BAT: [1]
+    - W_BAT: [1]
+    - F1: [1]
+  - - BAT: [2]
+    - W_BAT: [2]
+    - BUS_GND: [1]
+  - - F1: [2]
+    - W_F: [1]
+    - SW1: [1]
+  - - SW1: [2]
+    - W_SW: [1]
+    - BUS_24V: [1]
+  - - BUS_24V: [2]
+    - W_ES_IN: [1]
+    - ES1: [1]
+  - - ES1: [2]
+    - W_ES_OUT: [1]
+    - BUS_MOT: [1]
+
+  # 19 V for the Jetson (unswitched, stays on during E-stop)
+  - - BUS_24V: [3]
+    - W_DC19_IN: [1]
+    - DC19: [1]
+  - - BUS_GND: [8]
+    - W_DC19_IN: [2]
+    - DC19: [2]
+  - - DC19: [3, 4]
+    - W_JETSON: [1, 2]
+    - JETSON: [1, 2]
+
+  # 5 V for the status LEDs
+  - - BUS_24V: [4]
+    - W_DC5_IN: [1]
+    - DC5: [1]
+  - - BUS_GND: [9]
+    - W_DC5_IN: [2]
+    - DC5: [2]
+  - - DC5: [3, 4]
+    - W_LEDS: [1, 2]
+    - LEDS: [1, 2]
+
+  # USB devices
+  - - JETSON: [3]
+    - USB_F: [1]
+    - CAM_F: [1]
+  - - JETSON: [4]
+    - USB_R: [1]
+    - CAM_R: [1]
+  - - JETSON: [5]
+    - USB_L: [1]
+    - LIDAR: [1]
+  - - JETSON: [6]
+    - USB_P: [1]
+    - PICO: [1]
+
+  # Drive motors
+  - - BUS_MOT: [2]
+    - W_MD_L: [1]
+    - MD_L: [1]
+  - - BUS_GND: [2]
+    - W_MD_L: [2]
+    - MD_L: [2]
+  - - MD_L: [3, 4]
+    - W_M_L: [1, 2]
+    - M_L: [1, 2]
+  - - BUS_MOT: [3]
+    - W_MD_R: [1]
+    - MD_R: [1]
+  - - BUS_GND: [3]
+    - W_MD_R: [2]
+    - MD_R: [2]
+  - - MD_R: [3, 4]
+    - W_M_R: [1, 2]
+    - M_R: [1, 2]
+
+  # Arm motors (one dual-channel driver)
+  - - BUS_MOT: [4]
+    - W_AD: [1]
+    - AD: [1]
+  - - BUS_GND: [4]
+    - W_AD: [2]
+    - AD: [2]
+  - - AD: [3, 4]
+    - W_AM_1: [1, 2]
+    - AM_1: [1, 2]
+  - - AD: [5, 6]
+    - W_AM_2: [1, 2]
+    - AM_2: [1, 2]
+
+  # Dispenser steppers
+  - - BUS_MOT: [5]
+    - W_DRV_1: [1]
+    - DRV_1: [1]
+  - - BUS_GND: [5]
+    - W_DRV_1: [2]
+    - DRV_1: [2]
+  - - DRV_1: [3, 4, 5, 6]
+    - W_ST_1: [1, 2, 3, 4]
+    - ST_1: [1, 2, 3, 4]
+  - - BUS_MOT: [6]
+    - W_DRV_2: [1]
+    - DRV_2: [1]
+  - - BUS_GND: [6]
+    - W_DRV_2: [2]
+    - DRV_2: [2]
+  - - DRV_2: [3, 4, 5, 6]
+    - W_ST_2: [1, 2, 3, 4]
+    - ST_2: [1, 2, 3, 4]
+
+  # Headlights
+  - - BUS_MOT: [7]
+    - W_MOSFET: [1]
+    - MOSFET: [1]
+  - - BUS_GND: [7]
+    - W_MOSFET: [2]
+    - MOSFET: [2]
+  - - MOSFET: [3, 4]
+    - W_HEAD: [1, 2]
+    - HEAD: [1, 2]
