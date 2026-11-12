@@ -75,8 +75,9 @@ connectors:
     type: OAK-D Lite (rear)
     pinlabels: [USB-C]
   LIDAR:
-    type: RPLidar (model TBD)
+    type: RPLidar A2M8
     pinlabels: [USB]
+    notes: Via its USB adapter; use the adapter's aux power port if the motor won't spin up
   PICO:
     type: Raspberry Pi Pico (RP2040)
     pinlabels: [Micro-USB]

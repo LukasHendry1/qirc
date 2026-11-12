@@ -1,12 +1,13 @@
 """
-Launch the Slamtec RPLidar driver.
+Launch the Slamtec RPLidar A2M8 driver.
 
 Publishes sensor_msgs/LaserScan on /scan (frame: laser).
 
 Launch arguments:
     serial_port (default /dev/rplidar): needs udev/99-rplidar.rules installed;
         otherwise use e.g. serial_port:=/dev/ttyUSB0.
-    serial_baudrate (default 115200): depends on the RPLidar model:
+    serial_baudrate (default 115200, correct for the A2M8). Only change it
+        if the LiDAR is swapped for another model:
         A1, A2M8 ................ 115200
         A2M7, A2M12, A3, S1 ..... 256000
         C1 ...................... 460800
@@ -33,7 +34,7 @@ def generate_launch_description():
             description='Serial port of the RPLidar'),
         DeclareLaunchArgument(
             'serial_baudrate', default_value='115200',
-            description='RPLidar baud rate (model dependent, see file docstring)'),
+            description='RPLidar baud rate (115200 for the A2M8, see file docstring)'),
         Node(
             package='rplidar_ros',
             executable='rplidar_node',

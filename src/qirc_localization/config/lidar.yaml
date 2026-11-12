@@ -1,4 +1,6 @@
-# rplidar_ros (Slamtec) parameters for the RPLidar.
+# rplidar_ros (Slamtec) parameters for the RPLidar A2M8
+# (360 degrees, 0.15-12 m range, ~10 Hz scans).
+# Matches the driver's own rplidar_a2m8_launch.py settings.
 # serial_port and serial_baudrate are set as launch arguments in
 # launch/lidar.launch.py so they can be changed without editing this file.
 /**:
@@ -7,5 +9,6 @@
     frame_id: laser          # TODO: attach to base_link in the URDF
     inverted: false
     angle_compensate: true
-    # Empty = use the model's default scan mode (Standard / Sensitivity / ...).
+    # Empty = the LiDAR's default mode (Sensitivity on current A2M8 firmware;
+    # older firmware only has Standard / Express). Leave empty so it works on both.
     scan_mode: ''
