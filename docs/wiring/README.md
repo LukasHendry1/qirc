@@ -23,7 +23,7 @@ Wiring diagrams written as [WireViz](https://github.com/wireviz/WireViz) YAML. T
 - **Drive motor encoders:** the E-S Motor 36PG has none. Odometry needs them.
 - **Drive current:** motor stall (21 A) is above the MD10C's 13 A continuous rating (30 A peak), so firmware must limit current or detect stalls.
 - **30 V margin:** the MD10C and MDD10A are rated to 30 V and a full 8S LiFePO4 is 29.2 V. Don't drive while charging.
-- Battery not bought yet; RPLidar model unknown.
+- Battery not bought yet.
 
 ## Editing
 

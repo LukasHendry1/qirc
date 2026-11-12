@@ -48,7 +48,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 - [ ] `hw` Test the OAK-D Lite on the laptop (`ros2 launch qirc_bringup qirc.launch.py`)
 - [ ] `hw` Test the D435i on the laptop; check the IMU rate (`ros2 topic hz /front_camera/imu`)
-- [ ] `hw` Test the RPLidar; find the model and baud rate; install the udev rule
+- [ ] `hw` Test the RPLidar A2M8 (115200 baud); install the udev rule
 - [ ] `hw` **Record rosbags** of all sensors around a house or lab, as shared real data for development
 - [ ] `hw` Check that the TF tree connects every sensor frame to `base_link`
 
