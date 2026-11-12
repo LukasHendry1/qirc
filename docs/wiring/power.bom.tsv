@@ -30,7 +30,7 @@ Id	Description	Qty	Unit	Designators
 29	Connector, NEMA 17 stepper (dispenser 1), 4 pins	1		ST_1
 30	Connector, NEMA 17 stepper (dispenser 2), 4 pins	1		ST_2
 31	Connector, OAK-D Lite (rear), 1 pins	1		CAM_R
-32	Connector, RPLidar (model TBD), 1 pins	1		LIDAR
+32	Connector, RPLidar A2M8, 1 pins	1		LIDAR
 33	Connector, Raspberry Pi Pico (RP2040), 1 pins	1		PICO
 34	Connector, RealSense D435i (front), 1 pins	1		CAM_F
 35	Connector, WS2812B status LEDs, 2 pins	1		LEDS
