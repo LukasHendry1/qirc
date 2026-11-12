@@ -63,15 +63,15 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ---
 
-## Phase 3: Low-level control (motor controller + `qirc_base`)
+## Phase 3: Low-level control (motor controller + `qirc_pico_bridge`)
 
 - [ ] `now` Decide on the motor controller (Raspberry Pi Pico RP2040 recommended); write the pin map
 - [ ] `now` Define the serial protocol (track speeds, stepper/arm commands, encoder counts, status)
 - [ ] `now` Firmware skeleton in `firmware/` (PlatformIO), with a **watchdog** that stops all motors if commands stop arriving
 - [ ] `now` CI job that compiles the firmware
-- [ ] `now` `qirc_base` ROS 2 node: `/cmd_vel` → left/right track speeds → serial; includes a fake-controller mode for testing without hardware
+- [ ] `now` `qirc_pico_bridge` ROS 2 node: `/cmd_vel` → left/right track speeds → serial; includes a fake-controller mode for testing without hardware
 - [ ] `hw` Drive motors without speed feedback (MD10C ×2) → encoders → per-track speed PID
-- [ ] `hw` **Track odometry**: publish `/odom` and `odom → base_link` (see [Tracks and odometry](#tracks-and-odometry))
+- [ ] `hw` **Track odometry**: publish `/odom` from `qirc_pico_bridge`; the EKF, not the bridge, publishes the `odom → base_link` transform (see [Tracks and odometry](#tracks-and-odometry))
 - [ ] `hw` Stepper control (DRV8825 ×2), arm motors, homing with limit switches
 - [ ] `hw` Status LEDs and headlights
 - [ ] `robot` E-stop end to end: motors cut in hardware, software detects it and reports it
