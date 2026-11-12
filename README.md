@@ -14,26 +14,31 @@ The QIRC is an autonomous mobile robot that stores, dispenses, and delivers pill
 
 | Component | Purpose |
 |---|---|
-| Intel RealSense D435 | Depth/RGB camera for object, person, and stairwell detection |
-| OAK-D Lite | Second depth/RGB camera for perception |
+| Intel RealSense D435i (front) | Depth/RGB camera for object, person, and stairwell detection; its built-in IMU is used for odometry |
+| OAK-D Lite (rear) | Second depth/RGB camera; runs person detection on the camera itself |
 | RPLIDAR A2M8 | 360° 2D LiDAR for mapping and localization |
-| Jetson Nano | Onboard compute |
+| NVIDIA Jetson Orin Nano | Onboard compute |
 
 <!-- TODO: add drivetrain, stair-climbing mechanism, pill dispenser, and battery details. -->
 
 ## Software Architecture
 
-![Software architecture](softwareArchitectureV2.png)
+![Software architecture](docs/architecture/software_architecture.png)
 
 The QIRC runs on **ROS 2 (Humble)**. Functionality is split into packages, each containing nodes that communicate over ROS 2 topics, services, and actions.
 
 | Package | Responsibility |
 |---|---|
-| `perception` | Detect objects, people, and stairwells from camera input |
-| `localization` | Build a map and estimate the robot's pose |
-| `planning` | Decide where the robot goes and how it gets there |
-| `control` | Turn planned paths into vehicle commands |
-| `pill_dispenser` | Dispense pills and operate the delivery arm |
+| `qirc_perception` | Detect objects, people, and stairwells from camera input |
+| `qirc_localization` | Build a map and estimate the robot's pose |
+| `qirc_planning` | Decide where the robot goes and how it gets there |
+| `qirc_control` | Turn planned paths into vehicle commands |
+| `qirc_pill_dispenser` | Dispense pills and operate the delivery arm |
+| `qirc_bringup` | Launch files that start the whole robot |
+| `qirc_description` | Robot model (URDF) |
+| `qirc_interfaces` | Custom ROS 2 messages, services, and actions |
+
+All packages live in `src/`. The nodes and the topics between them are documented in [docs/architecture](docs/architecture/).
 
 ---
 
@@ -41,16 +46,17 @@ The QIRC runs on **ROS 2 (Humble)**. Functionality is split into packages, each 
 
 ### Perception Package
 
-Uses camera input from the RealSense D435 and the OAK-D Lite to detect objects, persons, and stairwells.
+Uses camera input from the RealSense D435i and the OAK-D Lite to detect objects, persons, and stairwells.
 
-- **Camera Node**: Primary node responsible for acquiring camera streams and publishing detections for the rest of the system.
+- **Camera drivers**: The manufacturers' ROS 2 drivers (`realsense2_camera`, `depthai_ros_driver`) stream the images, depth, and IMU data.
+- **Object Detection Node**: Runs detection on the camera streams and publishes detections for the rest of the system.
 
 ### Localization Package
 
-Uses LiDAR input to build a map of the home and determine where the robot is within it.
+Uses the RPLIDAR A2M8 (through Slamtec's `rplidar_ros` driver) to build a map of the home and determine where the robot is within it.
 
-- **Mapping Node**: Builds the map using SLAM. No prior map of the home is assumed, so the robot maps the space on first deployment.
-- **Localization Node**: Uses the saved map to estimate the robot's pose with Adaptive Monte Carlo Localization (AMCL).
+- **Mapping Node**: Builds the map using SLAM (`slam_toolbox`). No prior map of the home is assumed, so the robot maps the space on first deployment.
+- **Localization Node**: Loads the saved map and estimates the robot's pose within it (`slam_toolbox` localization mode).
 
 ### Planning Package
 
@@ -77,20 +83,30 @@ Handles medication storage and delivery.
 
 ## Getting Started
 
-<!-- TODO: fill in once the build is stable. -->
+Requires Ubuntu 22.04 with [ROS 2 Humble](https://docs.ros.org/en/humble/Installation.html) installed.
 
 ```bash
 # Clone the repository
-git clone <repo-url>
-cd <repo-name>
+git clone https://github.com/LukasHendry1/qirc.git
+cd qirc
 
-# Build (ROS 2 Humble)
-colcon build
+# Install dependencies (including the camera and LiDAR drivers)
+source /opt/ros/humble/setup.bash
+rosdep install --from-paths src --ignore-src -y
+
+# Build
+colcon build --symlink-install
 source install/setup.bash
 
-# Launch
-ros2 launch <package> <launch_file>
+# Launch the robot (each sensor can be turned off, e.g. use_lidar:=false)
+ros2 launch qirc_bringup qirc.launch.py
 ```
+
+## Documentation
+
+- [Roadmap](docs/ROADMAP.md): project phases and tasks
+- [Architecture](docs/architecture/): ROS 2 node graph, node list, and message definitions
+- [Wiring](docs/wiring/): power distribution diagram
 
 ## License
 
