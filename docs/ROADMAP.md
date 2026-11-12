@@ -10,23 +10,23 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Current state
 
-- [x] ROS 2 Humble workspace with one package per software stack (see the [software architecture](softwareArchitectureV2.png))
+- [x] ROS 2 Humble workspace with one package per software stack (see the [software architecture](architecture/software_architecture.png))
 - [x] CI: `colcon build` + `colcon test` on every PR; `main` protected (PR + passing CI required)
 - [x] Rear camera (OAK-D Lite) driver integration
 - [x] Front camera (RealSense D435i, including its IMU) driver integration
-- [ ] RPLidar driver integration (PR #4)
+- [x] RPLidar A2M8 driver integration
 - [ ] Hardware decisions pending: motor controller (Raspberry Pi Pico, tentative), drive and arm motors, battery
 
 ---
 
 ## Phase 0: Foundations (unblock parallel work)
 
-- [ ] `now` **Interfaces between stacks** (`qirc_interfaces`). Agreeing on these lets each stack be built independently.
-  - [ ] `Detection` / `DetectionArray`: class (person / object / stairwell), confidence, 3D position, source camera
-  - [ ] `RobotState`: vehicle manager state, battery, E-stop, errors
-  - [ ] `DispensePills` action: pill count, progress, result
-  - [ ] `ArmCommand`: target height
-  - [ ] Agree on topic names, and document them in the README
+- [ ] `now` **Interfaces between stacks** (`qirc_interfaces`). Agreeing on these lets each stack be built independently. Field sketches are in [messages.md](architecture/messages.md).
+  - [x] Agree on node and topic names, and document them ([docs/architecture](architecture/))
+  - [x] Detections use the standard `vision_msgs/Detection3DArray` (class: person / object / stairwell, confidence, 3D position), no custom message
+  - [ ] `RobotState`, `LightCommand` (#9) and `UserInfo` (#10) messages
+  - [ ] `DispensePills` (#11), `MoveArm` (#12) and `SearchForUser` (#14) actions
+  - [ ] Schedule services (#13)
 - [ ] `now` **Placeholder URDF** (`qirc_description`)
   - [ ] Chassis, **left/right tracks**, sensor mounts (front camera, rear camera, LiDAR) at estimated positions
   - [ ] Replace the `TODO` parent frames in the sensor launch files with URDF frames
@@ -38,7 +38,8 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
   - [ ] House-like world: rooms, furniture, **a staircase**
   - [ ] `use_sim:=true` in bringup to swap real drivers for the simulation
 - [ ] `now` **Visualization**: add `foxglove_bridge` to bringup (topics, camera feeds, LiDAR, teleop over the network)
-- [ ] `now` **Project management**: turn this roadmap into GitHub Issues and Milestones, and assign owners
+- [x] `now` **Project management**: turn this roadmap into GitHub Issues
+- [ ] `now` Group the issues into Milestones and assign owners
 
 **M0: drive the simulated robot with teleop and see its sensors in Foxglove.**
 
@@ -46,9 +47,9 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Phase 1: Sensor bring-up
 
-- [ ] `hw` Test the OAK-D Lite on the laptop (`ros2 launch qirc_bringup qirc.launch.py`)
+- [x] `hw` Test the OAK-D Lite on the laptop (`ros2 launch qirc_bringup qirc.launch.py`)
 - [ ] `hw` Test the D435i on the laptop; check the IMU rate (`ros2 topic hz /front_camera/imu`)
-- [ ] `hw` Test the RPLidar A2M8 (115200 baud); install the udev rule
+- [x] `hw` Test the RPLidar A2M8 (115200 baud); install the udev rule
 - [ ] `hw` **Record rosbags** of all sensors around a house or lab, as shared real data for development
 - [ ] `hw` Check that the TF tree connects every sensor frame to `base_link`
 
@@ -107,8 +108,8 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Phase 6: Perception
 
-- [ ] `hw` **Rear (OAK-D Lite)**: person detection on the camera's own chip, with 3D positions → `Detection` messages
-- [ ] `hw` **Front (D435i)**: YOLO on the Orin GPU (TensorRT) + aligned depth for 3D positions → `Detection` messages
+- [ ] `hw` **Rear (OAK-D Lite)**: person detection on the camera's own chip, with 3D positions → `/detections` (`vision_msgs/Detection3DArray`)
+- [ ] `hw` **Front (D435i)**: YOLO on the Orin GPU (TensorRT) + aligned depth for 3D positions → `/detections`
 - [ ] `now` **Stairwell detection**: choose between a custom-trained model and depth-based edge detection; gather and label data from the rosbags
 - [ ] `now` Feed detected obstacles and people into the local planner
 - [ ] `now` *(Optional)* identify the specific user (face or a marker) if more than one person could be present
