@@ -1,12 +1,11 @@
 # QIRC power distribution (draft)
 #
 # Render: pip install wireviz && wireviz docs/wiring/power.yml
-# Items marked TBD depend on parts not chosen yet (battery, drive motors,
-# arm motors). Wire gauges are placeholders until the drive motor stall
-# current is known; size the main fuse and main wires from it.
+# Assumes a 24 V system: 8S LiFePO4 battery, E-S Motor 36PG 24 V drive
+# motors, JGB37-520 24 V arm motors. Items marked TBD are still undecided.
 
 metadata:
-  title: QIRC power distribution (draft)
+  title: QIRC power distribution (draft, 24 V)
 
 options:
   bgcolor: WH
@@ -22,45 +21,46 @@ templates:
 connectors:
   # --- Source and protection ---------------------------------------------
   BAT:
-    type: Battery
-    subtype: 4S LiFePO4, 12.8 V nominal (10-14.6 V), ~12-15 Ah (TBD)
+    type: Battery, 8S LiFePO4
+    subtype: 25.6 V nominal (20-29.2 V), 10 Ah (256 Wh)
     pinlabels: [B+, B-]
-    notes: XT60 connector
+    notes: XT60 or XT90; BMS rated 40 A continuous or more
   F1:
     type: Main fuse + holder
-    subtype: Rating TBD (just above total peak current)
+    subtype: 40 A (ATO/MIDI)
     pinlabels: [IN, OUT]
   SW1:
     type: Main power switch
+    subtype: Rated 40 A DC or more
     pinlabels: [IN, OUT]
   ES1:
     type: E-stop (latching, normally closed)
-    subtype: Cuts the motor rail only
+    subtype: Cuts the motor rail only, rated 40 A DC or more
     pinlabels: [IN, OUT]
 
   # --- Distribution ------------------------------------------------------
-  BUS_12V:
+  BUS_24V:
     <<: *bus
-    subtype: Unswitched 12 V (after main switch)
+    subtype: Unswitched 24 V (after main switch)
     pinlabels: [IN, TO_E-STOP, TO_19V, TO_5V]
   BUS_MOT:
     <<: *bus
-    subtype: Motor rail (after E-stop)
-    pinlabels: [IN, DRIVE_L, DRIVE_R, ARM_1, ARM_2, STEP_1, STEP_2, LIGHTS]
+    subtype: Motor rail 24 V (after E-stop)
+    pinlabels: [IN, DRIVE_L, DRIVE_R, ARM, STEP_1, STEP_2, LIGHTS]
   BUS_GND:
     <<: *bus
     subtype: Common ground
-    pinlabels: [BAT, DRIVE_L, DRIVE_R, ARM_1, ARM_2, STEP_1, STEP_2, LIGHTS, 19V, 5V]
+    pinlabels: [BAT, DRIVE_L, DRIVE_R, ARM, STEP_1, STEP_2, LIGHTS, 19V, 5V]
 
   # --- Regulators and computer -------------------------------------------
   DC19:
     type: DC-DC buck-boost
-    subtype: 12 V in, 19 V out, 40 W min
+    subtype: 20-30 V in, 19 V out, 40 W min
     pinlabels: [IN+, IN-, OUT+, OUT-]
     notes: Keeps the Jetson stable when motors dip the battery
   DC5:
     type: DC-DC buck
-    subtype: 12 V in, 5 V out, 3 A min
+    subtype: 20-30 V in, 5 V out, 3 A min
     pinlabels: [IN+, IN-, OUT+, OUT-]
   JETSON:
     type: Jetson Orin Nano dev kit
@@ -82,51 +82,68 @@ connectors:
     pinlabels: [Micro-USB]
     notes: Signal wiring in a separate diagram (pin map TBD)
 
-  # --- Motor drivers and loads -------------------------------------------
+  # --- Drive ---------------------------------------------------------------
   MD_L:
     type: Cytron MD10C (drive left)
+    subtype: 5-30 V, 13 A continuous, 30 A peak
     pinlabels: [POWER+, POWER-, MA, MB]
+    notes: Motor stall (21 A) exceeds 13 A continuous; limit in firmware
   MD_R:
     type: Cytron MD10C (drive right)
+    subtype: 5-30 V, 13 A continuous, 30 A peak
     pinlabels: [POWER+, POWER-, MA, MB]
+    notes: Motor stall (21 A) exceeds 13 A continuous; limit in firmware
   M_L:
-    type: Drive motor left (TBD, 12 V with encoder)
+    type: Drive motor left
+    subtype: E-S Motor 36PG 555K, 24 V, 120 RPM, 2.6 A rated, 21 A stall
     pinlabels: [M+, M-]
+    notes: No encoder (encoder solution TBD)
   M_R:
-    type: Drive motor right (TBD, 12 V with encoder)
+    type: Drive motor right
+    subtype: E-S Motor 36PG 555K, 24 V, 120 RPM, 2.6 A rated, 21 A stall
     pinlabels: [M+, M-]
-  AD_1:
-    type: Arm motor driver 1 (TBD)
-    pinlabels: [V+, GND, OUT_A, OUT_B]
-  AD_2:
-    type: Arm motor driver 2 (TBD)
-    pinlabels: [V+, GND, OUT_A, OUT_B]
+    notes: No encoder (encoder solution TBD)
+
+  # --- Arm -----------------------------------------------------------------
+  AD:
+    type: Cytron MDD10A (arm, dual channel)
+    subtype: 5-30 V, 10 A per channel
+    pinlabels: [B+, B-, M1A, M1B, M2A, M2B]
+    notes: Same PWM + DIR interface as the MD10C
   AM_1:
-    type: Arm motor 1 (voltage TBD)
+    type: Arm motor 1
+    subtype: JGB37-520, 24 V, 10 W
     pinlabels: [M+, M-]
+    notes: Hall encoder (if fitted) wires to the Pico
   AM_2:
-    type: Arm motor 2 (voltage TBD)
+    type: Arm motor 2
+    subtype: JGB37-520, 24 V, 10 W
     pinlabels: [M+, M-]
+    notes: Hall encoder (if fitted) wires to the Pico
+
+  # --- Dispenser -----------------------------------------------------------
   DRV_1:
     type: DRV8825 (dispenser 1)
     pinlabels: [VMOT, GND, A1, A2, B1, B2]
-    notes: 100 uF cap across VMOT-GND; current limit 1.2-1.5 A
+    notes: 100 uF 50 V cap across VMOT-GND; current limit 1.2-1.5 A
   DRV_2:
     type: DRV8825 (dispenser 2)
     pinlabels: [VMOT, GND, A1, A2, B1, B2]
-    notes: 100 uF cap across VMOT-GND; current limit 1.2-1.5 A
+    notes: 100 uF 50 V cap across VMOT-GND; current limit 1.2-1.5 A
   ST_1:
     type: NEMA 17 stepper (dispenser 1)
     pinlabels: [A+, A-, B+, B-]
   ST_2:
     type: NEMA 17 stepper (dispenser 2)
     pinlabels: [A+, A-, B+, B-]
+
+  # --- Lights --------------------------------------------------------------
   MOSFET:
     type: Logic-level MOSFET module (headlights)
     pinlabels: [VIN+, VIN-, OUT+, OUT-]
     notes: PWM gate signal from Pico (signal diagram)
   HEAD:
-    type: Headlights (12 V LED)
+    type: Headlights (12-24 V LED)
     pinlabels: [+, '-']
   LEDS:
     type: WS2812B status LEDs
@@ -134,45 +151,35 @@ connectors:
     notes: Data line from Pico (signal diagram)
 
 cables:
-  # Main path: battery -> fuse -> switch -> 12 V bus -> E-stop -> motor bus
+  # Main path: battery -> fuse -> switch -> 24 V bus -> E-stop -> motor bus
   W_BAT:
     <<: *red_black
     gauge: 12 AWG
-    notes: Gauge TBD (size from motor stall current)
   W_F:
     wirecount: 1
     colors: [RD]
     gauge: 12 AWG
-    notes: Gauge TBD (size from motor stall current)
   W_SW:
     wirecount: 1
     colors: [RD]
     gauge: 12 AWG
-    notes: Gauge TBD (size from motor stall current)
   W_ES_IN:
     wirecount: 1
     colors: [RD]
     gauge: 12 AWG
-    notes: Gauge TBD (size from motor stall current)
   W_ES_OUT:
     wirecount: 1
     colors: [RD]
     gauge: 12 AWG
-    notes: Gauge TBD (size from motor stall current)
 
   # Feeds from the buses
   W_MD_L:
     <<: *red_black
     gauge: 14 AWG
-    notes: Gauge TBD (size from motor stall current)
   W_MD_R:
     <<: *red_black
     gauge: 14 AWG
-    notes: Gauge TBD (size from motor stall current)
-  W_AD_1:
-    <<: *red_black
-    gauge: 18 AWG
-  W_AD_2:
+  W_AD:
     <<: *red_black
     gauge: 18 AWG
   W_DRV_1:
@@ -186,10 +193,10 @@ cables:
     gauge: 18 AWG
   W_DC19_IN:
     <<: *red_black
-    gauge: 16 AWG
+    gauge: 18 AWG
   W_DC5_IN:
     <<: *red_black
-    gauge: 18 AWG
+    gauge: 20 AWG
 
   # Regulator outputs
   W_JETSON:
@@ -202,25 +209,19 @@ cables:
 
   # Motor leads
   W_M_L:
-    wirecount: 2
-    colors: [RD, BK]
+    <<: *red_black
     gauge: 14 AWG
-    notes: Gauge TBD (size from motor stall current)
+    notes: Solder or crimp to the motor's copper tabs
   W_M_R:
-    wirecount: 2
-    colors: [RD, BK]
+    <<: *red_black
     gauge: 14 AWG
-    notes: Gauge TBD (size from motor stall current)
+    notes: Solder or crimp to the motor's copper tabs
   W_AM_1:
-    wirecount: 2
-    colors: [RD, BK]
+    <<: *red_black
     gauge: 20 AWG
-    notes: Gauge TBD (size from motor stall current)
   W_AM_2:
-    wirecount: 2
-    colors: [RD, BK]
+    <<: *red_black
     gauge: 20 AWG
-    notes: Gauge TBD (size from motor stall current)
   W_ST_1:
     wirecount: 4
     colors: [BK, GN, RD, BU]
@@ -270,8 +271,8 @@ connections:
     - SW1: [1]
   - - SW1: [2]
     - W_SW: [1]
-    - BUS_12V: [1]
-  - - BUS_12V: [2]
+    - BUS_24V: [1]
+  - - BUS_24V: [2]
     - W_ES_IN: [1]
     - ES1: [1]
   - - ES1: [2]
@@ -279,10 +280,10 @@ connections:
     - BUS_MOT: [1]
 
   # 19 V for the Jetson (unswitched, stays on during E-stop)
-  - - BUS_12V: [3]
+  - - BUS_24V: [3]
     - W_DC19_IN: [1]
     - DC19: [1]
-  - - BUS_GND: [9]
+  - - BUS_GND: [8]
     - W_DC19_IN: [2]
     - DC19: [2]
   - - DC19: [3, 4]
@@ -290,10 +291,10 @@ connections:
     - JETSON: [1, 2]
 
   # 5 V for the status LEDs
-  - - BUS_12V: [4]
+  - - BUS_24V: [4]
     - W_DC5_IN: [1]
     - DC5: [1]
-  - - BUS_GND: [10]
+  - - BUS_GND: [9]
     - W_DC5_IN: [2]
     - DC5: [2]
   - - DC5: [3, 4]
@@ -334,40 +335,34 @@ connections:
     - W_M_R: [1, 2]
     - M_R: [1, 2]
 
-  # Arm motors
+  # Arm motors (one dual-channel driver)
   - - BUS_MOT: [4]
-    - W_AD_1: [1]
-    - AD_1: [1]
+    - W_AD: [1]
+    - AD: [1]
   - - BUS_GND: [4]
-    - W_AD_1: [2]
-    - AD_1: [2]
-  - - AD_1: [3, 4]
+    - W_AD: [2]
+    - AD: [2]
+  - - AD: [3, 4]
     - W_AM_1: [1, 2]
     - AM_1: [1, 2]
-  - - BUS_MOT: [5]
-    - W_AD_2: [1]
-    - AD_2: [1]
-  - - BUS_GND: [5]
-    - W_AD_2: [2]
-    - AD_2: [2]
-  - - AD_2: [3, 4]
+  - - AD: [5, 6]
     - W_AM_2: [1, 2]
     - AM_2: [1, 2]
 
   # Dispenser steppers
-  - - BUS_MOT: [6]
+  - - BUS_MOT: [5]
     - W_DRV_1: [1]
     - DRV_1: [1]
-  - - BUS_GND: [6]
+  - - BUS_GND: [5]
     - W_DRV_1: [2]
     - DRV_1: [2]
   - - DRV_1: [3, 4, 5, 6]
     - W_ST_1: [1, 2, 3, 4]
     - ST_1: [1, 2, 3, 4]
-  - - BUS_MOT: [7]
+  - - BUS_MOT: [6]
     - W_DRV_2: [1]
     - DRV_2: [1]
-  - - BUS_GND: [7]
+  - - BUS_GND: [6]
     - W_DRV_2: [2]
     - DRV_2: [2]
   - - DRV_2: [3, 4, 5, 6]
@@ -375,10 +370,10 @@ connections:
     - ST_2: [1, 2, 3, 4]
 
   # Headlights
-  - - BUS_MOT: [8]
+  - - BUS_MOT: [7]
     - W_MOSFET: [1]
     - MOSFET: [1]
-  - - BUS_GND: [8]
+  - - BUS_GND: [7]
     - W_MOSFET: [2]
     - MOSFET: [2]
   - - MOSFET: [3, 4]
