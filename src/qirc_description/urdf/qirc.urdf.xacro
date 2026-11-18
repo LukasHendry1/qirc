@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<!--
+  QIRC robot model (placeholder).
+
+  A box chassis between two tracks. Every dimension and mass is an ESTIMATE
+  until the chassis is designed; change the properties below, not the links.
+
+  Frames (REP 103: x forward, y left, z up):
+    base_link          root, on the ground, midway between the tracks and
+                       midway along them (the robot's turning centre). No
+                       inertia, so KDL / robot_state_publisher don't warn.
+    chassis_link       the body
+    left_track_link    left track (fixed; Gazebo drive wheels come in #24)
+    right_track_link   right track
+
+  Sensor frames are added in #20.
+
+  View it (after #21):  ros2 launch qirc_description display.launch.py
+  Expand it by hand:    xacro qirc.urdf.xacro > /tmp/qirc.urdf
+-->
+<robot name="qirc" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===== Dimensions (m) and masses (kg): ESTIMATES ===================== -->
+
+  <!-- Tracks: long enough to span two stair steps (~0.28 m run each). -->
+  <xacro:property name="track_length" value="0.60"/>   <!-- end to end -->
+  <xacro:property name="track_height" value="0.15"/>   <!-- = sprocket diameter -->
+  <xacro:property name="track_width" value="0.08"/>
+  <xacro:property name="track_mass" value="1.5"/>
+
+  <xacro:property name="chassis_length" value="0.50"/>
+  <xacro:property name="chassis_width" value="0.30"/>  <!-- between the tracks -->
+  <xacro:property name="chassis_height" value="0.30"/>
+  <xacro:property name="chassis_clearance" value="0.05"/>  <!-- ground to chassis underside -->
+  <xacro:property name="chassis_mass" value="10.0"/>   <!-- incl. battery, Jetson, dispenser -->
+
+  <xacro:property name="track_gap" value="0.01"/>      <!-- chassis side to track -->
+
+  <!-- ===== Derived values (don't edit) ==================================== -->
+  <xacro:property name="track_y" value="${chassis_width / 2 + track_gap + track_width / 2}"/>
+  <xacro:property name="track_straight" value="${track_length - track_height}"/>
+  <xacro:property name="track_radius" value="${track_height / 2}"/>
+
+  <!-- ===== Materials ======================================================= -->
+  <material name="qirc_white">
+    <color rgba="0.92 0.92 0.90 1.0"/>
+  </material>
+  <material name="qirc_track_grey">
+    <color rgba="0.20 0.20 0.22 1.0"/>
+  </material>
+
+  <!-- ===== Macros ========================================================== -->
+
+  <!-- Solid box inertia about its centre. -->
+  <xacro:macro name="box_inertial" params="mass x y z">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass * (y * y + z * z) / 12}" ixy="0" ixz="0"
+               iyy="${mass * (x * x + z * z) / 12}" iyz="0"
+               izz="${mass * (x * x + y * y) / 12}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Track shape: a box with a half-cylinder at each end (the sprockets). -->
+  <xacro:macro name="track_shape">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="${track_straight} ${track_width} ${track_height}"/>
+    </geometry>
+  </xacro:macro>
+  <xacro:macro name="track_end" params="x">
+    <origin xyz="${x} 0 0" rpy="${pi / 2} 0 0"/>
+    <geometry>
+      <cylinder radius="${track_radius}" length="${track_width}"/>
+    </geometry>
+  </xacro:macro>
+
+  <!-- One track. side: left / right, reflect: 1 (left) or -1 (right). -->
+  <xacro:macro name="track" params="side reflect">
+    <link name="${side}_track_link">
+      <visual>
+        <xacro:track_shape/>
+        <material name="qirc_track_grey"/>
+      </visual>
+      <visual>
+        <xacro:track_end x="${track_straight / 2}"/>
+        <material name="qirc_track_grey"/>
+      </visual>
+      <visual>
+        <xacro:track_end x="${-track_straight / 2}"/>
+        <material name="qirc_track_grey"/>
+      </visual>
+      <collision>
+        <xacro:track_shape/>
+      </collision>
+      <collision>
+        <xacro:track_end x="${track_straight / 2}"/>
+      </collision>
+      <collision>
+        <xacro:track_end x="${-track_straight / 2}"/>
+      </collision>
+      <xacro:box_inertial mass="${track_mass}"
+                          x="${track_length}" y="${track_width}" z="${track_height}"/>
+    </link>
+
+    <joint name="${side}_track_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${side}_track_link"/>
+      <origin xyz="0 ${reflect * track_y} ${track_radius}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ===== Links and joints ================================================ -->
+
+  <link name="base_link"/>
+
+  <link name="chassis_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <material name="qirc_white"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertial mass="${chassis_mass}"
+                        x="${chassis_length}" y="${chassis_width}" z="${chassis_height}"/>
+  </link>
+
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis_link"/>
+    <origin xyz="0 0 ${chassis_clearance + chassis_height / 2}" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:track side="left" reflect="1"/>
+  <xacro:track side="right" reflect="-1"/>
+
+</robot>
