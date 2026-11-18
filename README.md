@@ -105,6 +105,7 @@ ros2 launch qirc_bringup qirc.launch.py
 ## Documentation
 
 - [Roadmap](docs/ROADMAP.md): project phases and tasks
+- [System architecture](docs/architecture/system_architecture.png): sensors, ROS 2 software, Pico firmware, actuators and power in one diagram
 - [Architecture](docs/architecture/): ROS 2 node graph, node list, and message definitions
 - [Wiring](docs/wiring/): power distribution diagram
 
