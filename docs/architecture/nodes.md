@@ -31,7 +31,7 @@ Standard packages, configured in this repo.
 
 | Node | Package (configured in) | Status | Subscribes | Publishes |
 |---|---|---|---|---|
-| `robot_state_publisher` | `robot_state_publisher` (`qirc_description`) | planned (#21) | URDF | TF: `base_link` → sensor and track frames |
+| `robot_state_publisher` | `robot_state_publisher` (`qirc_description`) | integrated | URDF | `/robot_description`, TF: `base_link` → sensor and track frames |
 | `ekf` | `robot_localization` (`qirc_localization`) | planned (#54) | `/odom`, `/front_camera/imu` | `/odometry/filtered`, TF: `odom → base_link` |
 | `twist_mux` | `twist_mux` (`qirc_control`) | planned (#16) | `/cmd_vel_nav`, `/cmd_vel_teleop`, `/cmd_vel_web`, `/estop` (lock) | `/cmd_vel` |
 | `teleop` | `teleop_twist_keyboard` / `teleop_twist_joy` | planned (#16) | – | `/cmd_vel_teleop` |

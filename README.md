@@ -100,6 +100,9 @@ source install/setup.bash
 
 # Launch the robot (each sensor can be turned off, e.g. use_lidar:=false)
 ros2 launch qirc_bringup qirc.launch.py
+
+# View the robot model in RViz (no hardware needed)
+ros2 launch qirc_description display.launch.py
 ```
 
 ## Documentation

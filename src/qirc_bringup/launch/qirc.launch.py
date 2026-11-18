@@ -1,6 +1,9 @@
 """
 Launch the full QIRC software stack.
 
+Always starts robot_state_publisher (the robot model and its static TF, from
+qirc_description), so every sensor frame connects to base_link.
+
 Arguments:
     use_front_camera (default true): start the front RealSense driver.
         Set to false when developing without the camera plugged in.
@@ -32,6 +35,11 @@ NODES = [
 
 
 def generate_launch_description():
+    robot_description = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(PathJoinSubstitution([
+            FindPackageShare('qirc_description'), 'launch', 'description.launch.py',
+        ])),
+    )
     front_camera = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([
             FindPackageShare('qirc_perception'), 'launch', 'front_camera.launch.py',
@@ -61,6 +69,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_lidar', default_value='true',
             description='Start the RPLidar driver (false if no LiDAR attached)'),
+        robot_description,
         front_camera,
         rear_camera,
         lidar,
