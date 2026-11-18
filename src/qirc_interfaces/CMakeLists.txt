@@ -10,13 +10,24 @@ find_package(std_msgs REQUIRED)
 # Field definitions and which node uses each interface:
 # docs/architecture/messages.md
 set(msg_files
+  "msg/ArmCommand.msg"
+  "msg/DispenserCommand.msg"
+  "msg/DispenserState.msg"
   "msg/LightCommand.msg"
+  "msg/PillScheduleEntry.msg"
+  "msg/RobotState.msg"
+  "msg/UserInfo.msg"
 )
 
 set(srv_files
+  "srv/GetSchedule.srv"
+  "srv/SetSchedule.srv"
 )
 
 set(action_files
+  "action/DispensePills.action"
+  "action/MoveArm.action"
+  "action/SearchForUser.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

@@ -2,7 +2,7 @@
 
 The message types used between QIRC nodes. See [nodes.md](nodes.md) for which node publishes and subscribes to each topic.
 
-**Approach:** standard ROS messages wherever one fits, so existing tools (RViz, Foxglove, Nav2, rosbag) understand the data. Custom definitions live in `qirc_interfaces` (#8).
+**Approach:** standard ROS messages wherever one fits, so existing tools (RViz, Foxglove, Nav2, rosbag) understand the data. Custom definitions live in `qirc_interfaces`.
 
 ## Topics using standard messages
 
@@ -46,70 +46,11 @@ Notes:
 | `ArmCommand` | `/arm/command` | pill_dispenser → qirc_pico_bridge | #12 |
 | `PillScheduleEntry` | (inside schedule services) | – | #13 |
 
-Field sketches (to be finalized in each issue):
-
-```
-# RobotState.msg
-# Minimal state list for the first version; add states when they are needed
-# (e.g. stair climbing, #83). DISPENSING covers dispensing and raising the arm.
-uint8 SLEEP=0
-uint8 SEARCHING=1
-uint8 APPROACHING=2
-uint8 DISPENSING=3
-uint8 RETURNING=4
-uint8 ERROR=5
-std_msgs/Header header
-uint8 state
-string current_task
-string error_message
-float32 battery_percentage
-bool estop
-
-# LightCommand.msg
-uint8 IDLE=0
-uint8 BUSY=1
-uint8 ATTENTION=2
-uint8 ERROR=3
-uint8 status_pattern
-float32 headlight_brightness     # 0.0 - 1.0
-
-# UserInfo.msg
-std_msgs/Header header
-bool found
-geometry_msgs/PoseStamped pose
-float32 height                   # m, used for arm height
-float32 confidence
-builtin_interfaces/Time last_seen
-
-# DispenserCommand.msg
-uint8 dispenser_id
-int32 steps
-float32 speed                    # steps/s
-bool enable
-
-# DispenserState.msg
-uint8 dispenser_id
-int32 position                   # steps
-bool moving
-bool fault
-
-# ArmCommand.msg (replaces std_msgs/Float64MultiArray)
-std_msgs/Header header
-float64[2] position              # rad, target per arm motor (same order as /arm/joint_states)
-float32 max_speed                # rad/s
-bool enable                      # false = motor drivers off
-
-# PillScheduleEntry.msg
-uint8 hour
-uint8 minute
-uint8 dispenser_id
-uint8 pill_count
-string label
-```
+The definitions, with units and comments for each field, are in [`src/qirc_interfaces/msg`](../../src/qirc_interfaces/msg).
 
 ## Actions (`qirc_interfaces/action`)
 
-Used for anything that takes time, so the vehicle manager can watch progress, cancel, and get a clear result.
+Used for anything that takes time, so the vehicle manager can watch progress, cancel, and get a clear result. Definitions: [`src/qirc_interfaces/action`](../../src/qirc_interfaces/action).
 
 | Action | Server ← Client | Goal → Feedback → Result | Issue |
 |---|---|---|---|
@@ -121,6 +62,8 @@ Used for anything that takes time, so the vehicle manager can watch progress, ca
 `NavigateToPose` is the standard Nav2 action, used for "approach the user" and "return home". Using it means the Nav2 baseline (#59) and the custom planner can be swapped without changing the vehicle manager.
 
 ## Services (`qirc_interfaces/srv` and standard)
+
+Custom definitions: [`src/qirc_interfaces/srv`](../../src/qirc_interfaces/srv).
 
 | Service | Type | Server ← Client | Issue |
 |---|---|---|---|

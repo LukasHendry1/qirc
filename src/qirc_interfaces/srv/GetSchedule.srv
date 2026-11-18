@@ -1,0 +1,3 @@
+# Get the pill schedule. Served by vehicle_manager on /get_schedule.
+---
+PillScheduleEntry[] entries

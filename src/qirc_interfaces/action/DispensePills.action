@@ -1,0 +1,13 @@
+# Dispense pills from one dispenser. Served by pill_dispenser, called by vehicle_manager.
+
+# Goal
+uint8 dispenser_id      # which dispenser (0 or 1)
+uint8 pill_count        # pills to dispense
+---
+# Result
+bool success
+uint8 pills_dispensed
+string error_message    # empty on success
+---
+# Feedback
+uint8 pills_dispensed   # so far

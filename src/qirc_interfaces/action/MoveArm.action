@@ -1,0 +1,13 @@
+# Move the arm to a height, e.g. the user's height from /user_info.
+# Served by pill_dispenser, called by vehicle_manager.
+
+# Goal
+float32 target_height   # m, above the floor
+---
+# Result
+bool success
+float32 final_height    # m
+string error_message    # empty on success
+---
+# Feedback
+float32 current_height  # m
