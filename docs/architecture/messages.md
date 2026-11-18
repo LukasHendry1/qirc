@@ -26,7 +26,6 @@ The message types used between QIRC nodes. See [nodes.md](nodes.md) for which no
 | `/cmd_vel` | `geometry_msgs/Twist` | twist_mux → qirc_pico_bridge |
 | `/estop` | `std_msgs/Bool` | qirc_pico_bridge → twist_mux (lock), vehicle_manager |
 | `/battery` | `sensor_msgs/BatteryState` | qirc_pico_bridge → vehicle_manager, web app |
-| `/arm/command` | `std_msgs/Float64MultiArray` | pill_dispenser → qirc_pico_bridge (target position per arm motor) |
 | `/arm/joint_states` | `sensor_msgs/JointState` | qirc_pico_bridge → pill_dispenser |
 | TF (`/tf`, `/tf_static`) | `tf2_msgs/TFMessage` | robot_state_publisher, ekf, slam_toolbox → all |
 
@@ -44,12 +43,15 @@ Notes:
 | `UserInfo` | `/user_info` | user_detection → vehicle_manager, global_planner, pill_dispenser | #10 |
 | `DispenserCommand` | `/dispenser/command` | pill_dispenser → qirc_pico_bridge | #11 |
 | `DispenserState` | `/dispenser/state` | qirc_pico_bridge → pill_dispenser | #11 |
+| `ArmCommand` | `/arm/command` | pill_dispenser → qirc_pico_bridge | #12 |
 | `PillScheduleEntry` | (inside schedule services) | – | #13 |
 
 Field sketches (to be finalized in each issue):
 
 ```
 # RobotState.msg
+# Minimal state list for the first version; add states when they are needed
+# (e.g. stair climbing, #83). DISPENSING covers dispensing and raising the arm.
 uint8 SLEEP=0
 uint8 SEARCHING=1
 uint8 APPROACHING=2
@@ -89,8 +91,13 @@ bool enable
 uint8 dispenser_id
 int32 position                   # steps
 bool moving
-bool homed
 bool fault
+
+# ArmCommand.msg (replaces std_msgs/Float64MultiArray)
+std_msgs/Header header
+float64[2] position              # rad, target per arm motor (same order as /arm/joint_states)
+float32 max_speed                # rad/s
+bool enable                      # false = motor drivers off
 
 # PillScheduleEntry.msg
 uint8 hour
@@ -122,6 +129,16 @@ Used for anything that takes time, so the vehicle manager can watch progress, ca
 | `/vehicle_manager/start_mission` | `std_srvs/Trigger` | vehicle_manager ← web app | – |
 | `/vehicle_manager/stop` | `std_srvs/Trigger` | vehicle_manager ← web app | – |
 | `/vehicle_manager/go_home` | `std_srvs/Trigger` | vehicle_manager ← web app | – |
+| `/vehicle_manager/dispense_now` | `std_srvs/Trigger` | vehicle_manager ← web app ("Dispense now" button) | #13 |
+
+`start_mission` runs the full mission now (search, approach, dispense, return home). `dispense_now` dispenses the next scheduled dose immediately where the robot is, without searching, for when the user is already at the robot.
+
+## Design decisions
+
+- **`RobotState` keeps the minimum set of states** for the mission. More states are added as they are needed.
+- **No homing for the arm or the dispensers** (for now). The Pico counts positions from power-on, so the arm and dispensers must be in their rest position when the robot is switched on. The E-stop cuts only the motor rail, so the Pico keeps its position counts through an E-stop. Limit switch homing (#50) is deferred. `DispenserState` therefore has no `homed` flag.
+- **The arm command is a custom message** (`ArmCommand`) rather than `std_msgs/Float64MultiArray`, so the fields are named and typed. The arm state stays `sensor_msgs/JointState`, which RViz and Foxglove already understand.
+- **"Dispense now" is its own service** (`/vehicle_manager/dispense_now`), separate from `start_mission`.
 
 ## Dependencies
 

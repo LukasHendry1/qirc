@@ -184,13 +184,13 @@ box(1450, 1008, 320, 45, ['foxglove_bridge (dev tools)'])
 # --------------------------------------------------------------------------
 # Pico firmware
 # --------------------------------------------------------------------------
-box(2150, 150, 250, 90, ['Stepper Control:', 'STEP/DIR to 2× DRV8825,', 'homing with limit switches'])
-box(2150, 300, 250, 90, ['Arm Motor Control:', 'PWM/DIR to MDD10A,', 'homing with limit switches'])
+box(2150, 150, 250, 90, ['Stepper Control:', 'STEP/DIR to 2× DRV8825,', 'counts steps from power-on'])
+box(2150, 300, 250, 90, ['Arm Motor Control:', 'PWM/DIR to MDD10A,', 'position from encoders'])
 box(2150, 445, 250, 80, ['Lights:', 'WS2812B status patterns,', 'headlight PWM'])
 box(2150, 655, 250, 130, ['Drive Control:', 'per-track speed PID;', 'watchdog stops the motors',
                           'if commands stop arriving'])
 box(2150, 860, 250, 160, ['Sensing:', 'drive encoder counts (PIO)', 'E-stop state',
-                          'limit switches', 'battery voltage / current'])
+                          'battery voltage / current'])
 
 # --------------------------------------------------------------------------
 # Actuators and feedback
@@ -200,7 +200,7 @@ ellipse(2605, 345, 120, 55, ['Arm Motors', '2× JGB37-520'])
 ellipse(2605, 485, 120, 50, ['Status LEDs', '& Headlights'])
 ellipse(2605, 720, 120, 70, ['Drive Motors', '(left / right tracks)', '2× E-S 36PG'])
 ellipse(2605, 880, 120, 50, ['Drive Encoders', '(TBD)'])
-ellipse(2605, 1005, 120, 58, ['E-stop, Limit', 'Switches, Battery', 'Monitor'])
+ellipse(2605, 1005, 120, 58, ['E-stop and', 'Battery Monitor'])
 
 # --------------------------------------------------------------------------
 # Data flow

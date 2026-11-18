@@ -73,7 +73,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 - [ ] `now` `qirc_pico_bridge` ROS 2 node: `/cmd_vel` → left/right track speeds → serial; includes a fake-controller mode for testing without hardware
 - [ ] `hw` Drive motors without speed feedback (MD10C ×2) → encoders → per-track speed PID
 - [ ] `hw` **Track odometry**: publish `/odom` from `qirc_pico_bridge`; the EKF, not the bridge, publishes the `odom → base_link` transform (see [Tracks and odometry](#tracks-and-odometry))
-- [ ] `hw` Stepper control (DRV8825 ×2), arm motors, homing with limit switches
+- [ ] `hw` Stepper control (DRV8825 ×2) and arm motors (limit switch homing deferred, see [design decisions](architecture/messages.md#design-decisions))
 - [ ] `hw` Status LEDs and headlights
 - [ ] `robot` E-stop end to end: motors cut in hardware, software detects it and reports it
 
