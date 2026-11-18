@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<!--
+  Sensor mount frames. Included by qirc.urdf.xacro, which defines the
+  chassis properties used here.
+
+  Mount POSITIONS are ESTIMATES until the chassis is designed. Sensor sizes
+  and masses are from the datasheets.
+
+  Frames (names match docs/architecture/nodes.md and the driver configs):
+    front_camera_link   RealSense D435i, front face of the camera, facing +x.
+                        The driver adds the optical and IMU frames below it (#22).
+    rear_camera_link    OAK-D Lite, front face of the camera, facing -x.
+                        The driver adds its own frames below it (#22).
+    laser               RPLIDAR A2M8 scan plane, centre of rotation. Matches
+                        frame_id in qirc_localization/config/lidar.yaml.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===== Mount positions: ESTIMATES ===================================== -->
+  <!-- Cameras near the top of the front and back faces, level. Tilt them down
+       (positive pitch) if stair detection needs to see the floor closer in. -->
+  <xacro:property name="front_camera_z" value="0.30"/>
+  <xacro:property name="front_camera_pitch" value="0.0"/>
+  <xacro:property name="rear_camera_z" value="0.30"/>
+  <xacro:property name="rear_camera_pitch" value="0.0"/>
+
+  <!-- LiDAR on top, centred, so nothing blocks its 360 degree view. If the
+       dispenser or arm ends up on top, it must stay below the scan plane. -->
+  <xacro:property name="laser_x" value="0.0"/>
+  <!-- Check the LiDAR's zero angle on hardware (#32); set pi if scans are
+       reversed front to back. -->
+  <xacro:property name="laser_yaw" value="0.0"/>
+
+  <!-- ===== Sensor sizes (m) and masses (kg): datasheets =================== -->
+  <xacro:property name="d435i_size_x" value="0.025"/>   <!-- depth -->
+  <xacro:property name="d435i_size_y" value="0.090"/>
+  <xacro:property name="d435i_size_z" value="0.025"/>
+  <xacro:property name="d435i_mass" value="0.072"/>
+
+  <xacro:property name="oak_d_lite_size_x" value="0.0175"/>
+  <xacro:property name="oak_d_lite_size_y" value="0.091"/>
+  <xacro:property name="oak_d_lite_size_z" value="0.028"/>
+  <xacro:property name="oak_d_lite_mass" value="0.061"/>
+
+  <xacro:property name="a2m8_radius" value="0.038"/>
+  <xacro:property name="a2m8_height" value="0.041"/>
+  <xacro:property name="a2m8_scan_height" value="0.030"/>  <!-- base to scan plane -->
+  <xacro:property name="a2m8_mass" value="0.190"/>
+
+  <material name="qirc_sensor_black">
+    <color rgba="0.08 0.08 0.08 1.0"/>
+  </material>
+
+  <!-- ===== Cameras ========================================================= -->
+  <!-- A camera body behind its front face. The link frame is the front face. -->
+  <xacro:macro name="camera" params="name size_x size_y size_z mass x z pitch yaw">
+    <link name="${name}_link">
+      <visual>
+        <origin xyz="${-size_x / 2} 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${size_x} ${size_y} ${size_z}"/>
+        </geometry>
+        <material name="qirc_sensor_black"/>
+      </visual>
+      <collision>
+        <origin xyz="${-size_x / 2} 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${size_x} ${size_y} ${size_z}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="${-size_x / 2} 0 0" rpy="0 0 0"/>
+        <mass value="${mass}"/>
+        <inertia ixx="${mass * (size_y * size_y + size_z * size_z) / 12}" ixy="0" ixz="0"
+                 iyy="${mass * (size_x * size_x + size_z * size_z) / 12}" iyz="0"
+                 izz="${mass * (size_x * size_x + size_y * size_y) / 12}"/>
+      </inertial>
+    </link>
+
+    <joint name="${name}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${name}_link"/>
+      <origin xyz="${x} 0 ${z}" rpy="0 ${pitch} ${yaw}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Front: mounted on the front face of the chassis. -->
+  <xacro:camera name="front_camera"
+                size_x="${d435i_size_x}" size_y="${d435i_size_y}" size_z="${d435i_size_z}"
+                mass="${d435i_mass}"
+                x="${chassis_length / 2 + d435i_size_x}" z="${front_camera_z}"
+                pitch="${front_camera_pitch}" yaw="0"/>
+
+  <!-- Back: mounted on the back face, facing backwards. -->
+  <xacro:camera name="rear_camera"
+                size_x="${oak_d_lite_size_x}" size_y="${oak_d_lite_size_y}"
+                size_z="${oak_d_lite_size_z}" mass="${oak_d_lite_mass}"
+                x="${-(chassis_length / 2 + oak_d_lite_size_x)}" z="${rear_camera_z}"
+                pitch="${rear_camera_pitch}" yaw="${pi}"/>
+
+  <!-- ===== LiDAR =========================================================== -->
+  <!-- The frame is the scan plane; the body sits below and above it. -->
+  <xacro:property name="a2m8_body_z" value="${a2m8_height / 2 - a2m8_scan_height}"/>
+
+  <link name="laser">
+    <visual>
+      <origin xyz="0 0 ${a2m8_body_z}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${a2m8_radius}" length="${a2m8_height}"/>
+      </geometry>
+      <material name="qirc_sensor_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${a2m8_body_z}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${a2m8_radius}" length="${a2m8_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 ${a2m8_body_z}" rpy="0 0 0"/>
+      <mass value="${a2m8_mass}"/>
+      <inertia ixx="${a2m8_mass * (3 * a2m8_radius * a2m8_radius + a2m8_height * a2m8_height) / 12}"
+               ixy="0" ixz="0"
+               iyy="${a2m8_mass * (3 * a2m8_radius * a2m8_radius + a2m8_height * a2m8_height) / 12}"
+               iyz="0"
+               izz="${a2m8_mass * a2m8_radius * a2m8_radius / 2}"/>
+    </inertial>
+  </link>
+
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <origin xyz="${laser_x} 0 ${chassis_clearance + chassis_height + a2m8_scan_height}"
+            rpy="0 0 ${laser_yaw}"/>
+  </joint>
+
+</robot>

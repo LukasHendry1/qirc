@@ -12,8 +12,8 @@
     chassis_link       the body
     left_track_link    left track (fixed; Gazebo drive wheels come in #24)
     right_track_link   right track
-
-  Sensor frames are added in #20.
+    front_camera_link, rear_camera_link, laser
+                       sensor mounts, see sensors.urdf.xacro
 
   View it (after #21):  ros2 launch qirc_description display.launch.py
   Expand it by hand:    xacro qirc.urdf.xacro > /tmp/qirc.urdf
@@ -141,5 +141,8 @@
 
   <xacro:track side="left" reflect="1"/>
   <xacro:track side="right" reflect="-1"/>
+
+  <!-- Path is relative to this file, so it works without sourcing the package. -->
+  <xacro:include filename="sensors.urdf.xacro"/>
 
 </robot>
