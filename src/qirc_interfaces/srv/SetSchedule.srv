@@ -1,0 +1,5 @@
+# Replace the whole pill schedule. Served by vehicle_manager on /set_schedule.
+PillScheduleEntry[] entries
+---
+bool success
+string message          # reason when success is false

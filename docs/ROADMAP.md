@@ -21,12 +21,12 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Phase 0: Foundations (unblock parallel work)
 
-- [ ] `now` **Interfaces between stacks** (`qirc_interfaces`). Agreeing on these lets each stack be built independently. Field sketches are in [messages.md](architecture/messages.md).
+- [x] `now` **Interfaces between stacks** (`qirc_interfaces`). Agreeing on these lets each stack be built independently. Definitions are in [`src/qirc_interfaces`](../src/qirc_interfaces); which node uses each one is in [messages.md](architecture/messages.md).
   - [x] Agree on node and topic names, and document them ([docs/architecture](architecture/))
   - [x] Detections use the standard `vision_msgs/Detection3DArray` (class: person / object / stairwell, confidence, 3D position), no custom message
-  - [ ] `RobotState`, `LightCommand` (#9) and `UserInfo` (#10) messages
-  - [ ] `DispensePills` (#11), `MoveArm` (#12) and `SearchForUser` (#14) actions
-  - [ ] Schedule services (#13)
+  - [x] `RobotState`, `LightCommand` (#9) and `UserInfo` (#10) messages
+  - [x] `DispensePills` (#11), `MoveArm` (#12) and `SearchForUser` (#14) actions
+  - [x] Schedule services (#13)
 - [ ] `now` **Placeholder URDF** (`qirc_description`)
   - [ ] Chassis, **left/right tracks**, sensor mounts (front camera, rear camera, LiDAR) at estimated positions
   - [ ] Replace the `TODO` parent frames in the sensor launch files with URDF frames

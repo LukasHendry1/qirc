@@ -1,0 +1,14 @@
+# Search the home for the user. Served by global_planner, called by vehicle_manager.
+# The planner generates points to check, drives to them in turn, and stops
+# when user_detection reports the user (found on /user_info).
+
+# Goal
+geometry_msgs/Polygon search_area   # map frame; empty = the whole known map
+---
+# Result
+bool found
+geometry_msgs/PoseStamped user_pose  # valid only if found
+---
+# Feedback
+uint16 points_checked
+uint16 points_remaining
