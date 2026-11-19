@@ -25,6 +25,16 @@ Vendor packages, configured and launched from this repo.
 
 The only node that talks to the Pico (one serial port, one owner). It relays commands and state and contains no multi-step logic. It publishes `/odom` but **not** the `odom → base_link` transform; the EKF publishes that.
 
+## Simulation (`qirc_gazebo`)
+
+Replaces the sensor drivers and the hardware bridge when running in Gazebo Fortress (`ros2 launch qirc_gazebo sim.launch.py`). The topics and frames are the same as on the real robot.
+
+| Node | Package | Status | Subscribes | Publishes |
+|---|---|---|---|---|
+| `ign gazebo` | Gazebo Fortress, via `ros_gz_sim` | integrated | – | (Gazebo topics, bridged below) |
+| `gz_bridge` | `ros_gz_bridge` | integrated | `/cmd_vel` | `/clock`, `/odom`, `/joint_states`, `/scan` |
+| `gz_odom_tf_bridge` | `ros_gz_bridge` | integrated | – | TF: `odom → base_link` (from DiffDrive; off with `publish_odom_tf:=false` once the EKF runs) |
+
 ## Infrastructure
 
 Standard packages, configured in this repo.
@@ -84,3 +94,5 @@ Mapping mode builds and saves the house map; localization mode loads it on later
 ```
 map ──(slam_toolbox)──► odom ──(ekf)──► base_link ──(robot_state_publisher)──► front_camera_link, rear_camera_link, laser, tracks
 ```
+
+In simulation, until the EKF (#54) exists, Gazebo's DiffDrive publishes `odom → base_link`, and `robot_state_publisher` also publishes the road wheel frames under each track.

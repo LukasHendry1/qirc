@@ -1,0 +1,8 @@
+# DiffDrive's odom -> base_link transform, bridged to /tf.
+# sim.launch.py starts this bridge only while publish_odom_tf is true.
+
+- ros_topic_name: /tf
+  gz_topic_name: /odom/tf
+  ros_type_name: tf2_msgs/msg/TFMessage
+  gz_type_name: ignition.msgs.Pose_V
+  direction: GZ_TO_ROS

@@ -32,9 +32,11 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
   - [ ] Replace the `TODO` parent frames in the sensor launch files with URDF frames
   - [ ] Update with real measurements once the chassis is designed
 - [ ] `now` **Gazebo (Fortress) simulation**: the biggest unblocker while hardware is pending
-  - [ ] New `qirc_gazebo` package; `ros_gz` bridge for topics
-  - [ ] Tracked robot: start with the `DiffDrive` system, then switch to `TrackedVehicle` (see [Tracks in simulation](#tracks-in-simulation))
-  - [ ] Simulated 2D LiDAR, RGB-D camera, IMU
+  - [x] New `qirc_gazebo` package; `ros_gz` bridge for topics
+  - [x] Tracked robot: start with the `DiffDrive` system (road wheels)
+  - [ ] Then switch to `TrackedVehicle` for stairs (#84, see [Tracks in simulation](#tracks-in-simulation))
+  - [x] Simulated 2D LiDAR
+  - [ ] Simulated RGB-D camera and IMU (#27)
   - [ ] House-like world: rooms, furniture, **a staircase**
   - [ ] `use_sim:=true` in bringup to swap real drivers for the simulation
 - [ ] `now` **Visualization**: add `foxglove_bridge` to bringup (topics, camera feeds, LiDAR, teleop over the network)

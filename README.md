@@ -36,6 +36,7 @@ The QIRC runs on **ROS 2 (Humble)**. Functionality is split into packages, each 
 | `qirc_pill_dispenser` | Dispense pills and operate the delivery arm |
 | `qirc_bringup` | Launch files that start the whole robot |
 | `qirc_description` | Robot model (URDF) |
+| `qirc_gazebo` | Gazebo Fortress simulation: worlds, robot spawning, ROS bridge |
 | `qirc_interfaces` | Custom ROS 2 messages, services, and actions |
 
 All packages live in `src/`. The nodes and the topics between them are documented in [docs/architecture](docs/architecture/).
@@ -104,6 +105,17 @@ ros2 launch qirc_bringup qirc.launch.py
 # View the robot model in RViz (no hardware needed)
 ros2 launch qirc_description display.launch.py
 ```
+
+### Simulation
+
+The Gazebo Fortress simulation needs no hardware. `rosdep install` above installs Gazebo with `ros_gz`.
+
+```bash
+ros2 launch qirc_gazebo sim.launch.py
+ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it (/cmd_vel)
+```
+
+See [`src/qirc_gazebo`](src/qirc_gazebo/README.md) for the worlds, topics and options.
 
 ## Documentation
 

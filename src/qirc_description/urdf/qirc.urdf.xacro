@@ -10,15 +10,25 @@
                        midway along them (the robot's turning centre). No
                        inertia, so KDL / robot_state_publisher don't warn.
     chassis_link       the body
-    left_track_link    left track (fixed; Gazebo drive wheels come in #24)
+    left_track_link    left track (fixed; in simulation, road wheels under it
+                       drive the robot, see gazebo.urdf.xacro)
     right_track_link   right track
     front_camera_link, rear_camera_link, laser
                        sensor mounts, see sensors.urdf.xacro
 
-  View it (after #21):  ros2 launch qirc_description display.launch.py
-  Expand it by hand:    xacro qirc.urdf.xacro > /tmp/qirc.urdf
+  Arguments:
+    sim (default false): add the Gazebo parts (road wheels, DiffDrive, LiDAR
+                         sensor) from gazebo.urdf.xacro. The real robot's
+                         model and TF are the same either way, apart from
+                         the wheel frames.
+
+  View it:            ros2 launch qirc_description display.launch.py
+  Expand it by hand:  xacro qirc.urdf.xacro [sim:=true] > /tmp/qirc.urdf
 -->
 <robot name="qirc" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="sim" default="false"/>
+  <xacro:property name="sim" value="$(arg sim)"/>
 
   <!-- ===== Dimensions (m) and masses (kg): ESTIMATES ===================== -->
 
@@ -91,15 +101,19 @@
         <xacro:track_end x="${-track_straight / 2}"/>
         <material name="qirc_track_grey"/>
       </visual>
-      <collision>
-        <xacro:track_shape/>
-      </collision>
-      <collision>
-        <xacro:track_end x="${track_straight / 2}"/>
-      </collision>
-      <collision>
-        <xacro:track_end x="${-track_straight / 2}"/>
-      </collision>
+      <!-- In simulation the road wheels touch the ground instead; track
+           collisions would drag along the floor and fight them. -->
+      <xacro:unless value="${sim}">
+        <collision>
+          <xacro:track_shape/>
+        </collision>
+        <collision>
+          <xacro:track_end x="${track_straight / 2}"/>
+        </collision>
+        <collision>
+          <xacro:track_end x="${-track_straight / 2}"/>
+        </collision>
+      </xacro:unless>
       <xacro:box_inertial mass="${track_mass}"
                           x="${track_length}" y="${track_width}" z="${track_height}"/>
     </link>
@@ -144,5 +158,9 @@
 
   <!-- Path is relative to this file, so it works without sourcing the package. -->
   <xacro:include filename="sensors.urdf.xacro"/>
+
+  <xacro:if value="${sim}">
+    <xacro:include filename="gazebo.urdf.xacro"/>
+  </xacro:if>
 
 </robot>
