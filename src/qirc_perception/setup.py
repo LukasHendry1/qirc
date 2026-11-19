@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'front_detection_node = qirc_perception.front_detection_node:main',
+            'rear_detection_node = qirc_perception.rear_detection_node:main',
         ],
     },
 )

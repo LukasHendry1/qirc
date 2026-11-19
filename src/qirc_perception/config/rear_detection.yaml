@@ -1,0 +1,8 @@
+# rear_detection parameters (republishes the rear OAK-D Lite's on-camera detections).
+/**:
+  ros__parameters:
+    # Must match i_nn_config_path in rear_camera.yaml: class names are read
+    # from this model config so the class numbers map to the right names.
+    nn_config: 'depthai_ros_driver/mobilenet'
+
+    min_confidence: 0.5   # 0-1; the model itself already drops results below 0.5

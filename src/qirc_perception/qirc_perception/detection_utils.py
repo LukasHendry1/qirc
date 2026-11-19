@@ -5,6 +5,7 @@ Pure functions (numpy and ROS messages only, no ML libraries), so they can be
 unit-tested without a camera or a model.
 """
 
+import json
 import math
 
 from geometry_msgs.msg import Point
@@ -131,4 +132,45 @@ def make_detection(header, label, score, box, depth, k):
     hypothesis.pose.pose.position = Point(x=x, y=y, z=z)
     hypothesis.pose.pose.orientation.w = 1.0
     detection.results.append(hypothesis)
+    return detection
+
+
+def load_label_names(nn_config_text):
+    """
+    Return the class names from a depthai neural network config (JSON text).
+
+    The names are in mappings.labels, indexed by the model's class number.
+    """
+    return list(json.loads(nn_config_text)['mappings']['labels'])
+
+
+def relabel_detection(detection, label_names, min_confidence):
+    """
+    Relabel a detection from the OAK camera for /detections, or return None.
+
+    The depthai driver sets class_id to the model's class number as a string
+    (e.g. '15' is person in the VOC classes). This keeps the most confident
+    result, maps its class to 'person' or 'object', and drops the detection if
+    it is below min_confidence or is the 'background' class. The position and
+    bounding box are kept unchanged.
+    """
+    if not detection.results:
+        return None
+    best = max(detection.results, key=lambda r: r.hypothesis.score)
+    if best.hypothesis.score < min_confidence:
+        return None
+
+    class_id = best.hypothesis.class_id.strip()
+    if class_id.isdigit():
+        index = int(class_id)
+        if index >= len(label_names):
+            return None
+        class_name = label_names[index]
+    else:
+        class_name = class_id  # already a name
+    if class_name.lower() == 'background':
+        return None
+
+    best.hypothesis.class_id = to_qirc_label(class_name)
+    detection.results = [best]
     return detection
