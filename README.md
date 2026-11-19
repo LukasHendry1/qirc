@@ -115,6 +115,12 @@ ros2 launch qirc_gazebo sim.launch.py
 ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it (/cmd_vel)
 ```
 
+To build a map while driving, run this as well:
+
+```bash
+ros2 launch qirc_localization mapping.launch.py use_sim_time:=true rviz:=true
+```
+
 See [`src/qirc_gazebo`](src/qirc_gazebo/README.md) for the worlds, topics and options.
 
 ## Documentation

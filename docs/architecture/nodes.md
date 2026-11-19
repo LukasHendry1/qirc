@@ -61,9 +61,9 @@ Standard packages, configured in this repo.
 
 | Node | Package | Status | Subscribes | Publishes |
 |---|---|---|---|---|
-| `slam_toolbox` | `slam_toolbox` | planned (#55) | `/scan`, TF `odom → base_link` | `/map`, TF: `map → odom` |
+| `slam_toolbox` | `slam_toolbox` | integrated, mapping mode, in simulation (#55) | `/scan`, TF `odom → base_link` | `/map`, TF: `map → odom` |
 
-Mapping mode builds and saves the house map; localization mode loads it on later runs (#56). The current `mapping_node` and `localization_node` stubs will be replaced by, or become wrappers around, `slam_toolbox`.
+Mapping mode builds the house map (`ros2 launch qirc_localization mapping.launch.py`, parameters in `config/mapper_params.yaml`). Saving it, and localization mode loading it on later runs, is #56. The current `mapping_node` and `localization_node` stubs will be replaced by, or become wrappers around, `slam_toolbox`.
 
 ## Planning and control (`qirc_planning`, `qirc_control`)
 
