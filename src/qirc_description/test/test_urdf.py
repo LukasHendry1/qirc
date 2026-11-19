@@ -234,3 +234,20 @@ def test_diff_drive_topics_and_frames(sim_robot):
     assert plugin.findtext('frame_id') == 'odom'
     assert plugin.findtext('child_frame_id') == 'base_link'
     assert _plugin(sim_robot, 'JointStatePublisher').findtext('topic') == '/joint_states'
+
+
+def test_sim_lidar_matches_the_real_one(sim_robot):
+    # Same topic, frame and specs as rplidar_ros with the A2M8, so slam_toolbox
+    # can't tell the difference.
+    gazebo = next(g for g in sim_robot.findall('gazebo') if g.get('reference') == 'laser')
+    sensor = gazebo.find('sensor')
+    assert sensor.get('type') == 'gpu_lidar'
+    assert sensor.findtext('topic') == '/scan'
+    assert sensor.findtext('ignition_frame_id') == 'laser'
+    assert float(sensor.findtext('update_rate')) == pytest.approx(10)
+    horizontal = sensor.find('lidar/scan/horizontal')
+    samples = int(horizontal.findtext('samples'))
+    span = float(horizontal.findtext('max_angle')) - float(horizontal.findtext('min_angle'))
+    assert span + 2 * math.pi / samples == pytest.approx(2 * math.pi), 'must cover 360 degrees'
+    assert float(sensor.findtext('lidar/range/min')) == pytest.approx(0.15)
+    assert float(sensor.findtext('lidar/range/max')) == pytest.approx(12.0)

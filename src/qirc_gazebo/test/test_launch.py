@@ -82,6 +82,7 @@ def test_bridged_ros_topics():
         '/odom': 'GZ_TO_ROS',
         '/tf': 'GZ_TO_ROS',
         '/joint_states': 'GZ_TO_ROS',
+        '/scan': 'GZ_TO_ROS',
     }
 
 

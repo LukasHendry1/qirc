@@ -14,6 +14,7 @@
     /odom/tf        out  the same pose as TF; sim.launch.py bridges it to
                          /tf unless publish_odom_tf:=false (the EKF, #54)
     /joint_states   out  wheel joints, for robot_state_publisher
+    /scan           out  sensor_msgs/LaserScan in frame laser, like rplidar_ros
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -82,6 +83,54 @@
 
   <xacro:road_wheels side="left" i="${road_wheel_count - 1}"/>
   <xacro:road_wheels side="right" i="${road_wheel_count - 1}"/>
+
+  <!-- ===== LiDAR =========================================================== -->
+  <!-- RPLIDAR A2M8, set up like the real driver (rplidar_ros, lidar.yaml):
+       360 degrees, 10 Hz, 8000 samples/s -> 800 per scan, 0.15-12 m. -->
+  <xacro:property name="lidar_rate" value="10"/>
+  <xacro:property name="lidar_samples" value="800"/>
+  <xacro:property name="lidar_min_range" value="0.15"/>
+  <xacro:property name="lidar_max_range" value="12.0"/>
+  <xacro:property name="lidar_noise" value="0.01"/>   <!-- stddev, m -->
+
+  <gazebo reference="laser">
+    <sensor name="lidar" type="gpu_lidar">
+      <topic>/scan</topic>
+      <!-- The laser link is merged into base_link when the URDF becomes
+           SDF (fixed joint), so name the frame explicitly. -->
+      <ignition_frame_id>laser</ignition_frame_id>
+      <update_rate>${lidar_rate}</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>${lidar_samples}</samples>
+            <resolution>1</resolution>
+            <!-- -180 to just under +180 degrees, so no ray is repeated. -->
+            <min_angle>${-pi}</min_angle>
+            <max_angle>${pi - 2 * pi / lidar_samples}</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>${lidar_min_range}</min>
+          <max>${lidar_max_range}</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0</mean>
+          <stddev>${lidar_noise}</stddev>
+        </noise>
+      </lidar>
+    </sensor>
+  </gazebo>
 
   <!-- ===== Systems ========================================================= -->
   <gazebo>
