@@ -36,7 +36,7 @@ To see the robot and scan in RViz, run `rviz2` and set the fixed frame to `odom`
 ## The simulated robot
 
 - **Tracks:** each track is a row of 4 road wheels (collision only, so it still looks like a track) driven by Gazebo's `DiffDrive` system. This works on flat ground. Stairs need the `TrackedVehicle` system instead (#84).
-- **Turning skids, like the real tracks.** Driving straight, `/odom` matches the true pose. Turning on the spot, `/odom` overestimates the turn by about 1.4×, because the front and back wheels drag sideways. This is the same problem the real robot has (#57), and slam_toolbox corrects it.
+- **Turning skids, like the real tracks.** The front and back wheels drag sideways, so the robot turns about 1.4× less than its wheel speeds suggest. DiffDrive is given the **effective** track separation (`track_skid_factor` in `gazebo.urdf.xacro`), the same calibration #57 does on the real robot. With it, `/odom` matches the true pose within a few degrees per half turn. slam_toolbox depends on this: it adds no scans while the robot turns on the spot, so the heading through a turn comes from odometry alone.
 - **LiDAR:** set up like the RPLIDAR A2M8 with `rplidar_ros`: 360°, 10 Hz, 800 points per scan, 0.15–12 m, 1 cm noise.
 
 Wheel count, friction and LiDAR settings are properties at the top of each section of `gazebo.urdf.xacro`.
