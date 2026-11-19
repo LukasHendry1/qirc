@@ -1,0 +1,12 @@
+# front_detection parameters (YOLO on the front RealSense D435i).
+/**:
+  ros__parameters:
+    # YOLO weights. A standard model name (yolo11n.pt, yolo11s.pt, ...) is
+    # downloaded to this path on first use. yolo11n is the smallest and
+    # fastest; the TensorRT version for the Orin comes in #68.
+    model: '~/.cache/qirc/yolo11n.pt'
+
+    confidence_threshold: 0.5   # 0-1; raise if there are false detections
+    image_size: 640             # inference size in pixels
+    device: ''                  # '' = GPU if available, else CPU
+    max_depth: 6.0              # m; the D435i's depth is unreliable beyond ~6 m

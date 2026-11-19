@@ -23,7 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'object_detection_node = qirc_perception.object_detection_node:main',
+            'front_detection_node = qirc_perception.front_detection_node:main',
+            'rear_detection_node = qirc_perception.rear_detection_node:main',
         ],
     },
 )

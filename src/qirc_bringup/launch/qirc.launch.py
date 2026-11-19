@@ -11,6 +11,9 @@ Arguments:
         Set to false when developing without the camera plugged in.
     use_lidar (default true): start the RPLidar driver.
         Set to false when developing without the LiDAR plugged in.
+    use_front_detection (default true): run YOLO on the front camera.
+        Needs Ultralytics (src/qirc_perception/README.md); set to false if
+        it isn't installed.
 """
 
 from launch import LaunchDescription
@@ -22,7 +25,6 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 NODES = [
-    ('qirc_perception', 'object_detection_node'),
     ('qirc_localization', 'mapping_node'),
     ('qirc_localization', 'localization_node'),
     ('qirc_planning', 'vehicle_manager_node'),
@@ -58,6 +60,23 @@ def generate_launch_description():
         ])),
         condition=IfCondition(LaunchConfiguration('use_lidar')),
     )
+    front_detection = Node(
+        package='qirc_perception',
+        executable='front_detection_node',
+        parameters=[PathJoinSubstitution([
+            FindPackageShare('qirc_perception'), 'config', 'front_detection.yaml',
+        ])],
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('use_front_detection')),
+    )
+    rear_detection = Node(
+        package='qirc_perception',
+        executable='rear_detection_node',
+        parameters=[PathJoinSubstitution([
+            FindPackageShare('qirc_perception'), 'config', 'rear_detection.yaml',
+        ])],
+        output='screen',
+    )
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -69,9 +88,14 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_lidar', default_value='true',
             description='Start the RPLidar driver (false if no LiDAR attached)'),
+        DeclareLaunchArgument(
+            'use_front_detection', default_value='true',
+            description='Run YOLO on the front camera (needs Ultralytics installed)'),
         robot_description,
         front_camera,
         rear_camera,
         lidar,
+        front_detection,
+        rear_detection,
         *[Node(package=pkg, executable=exe, output='screen') for pkg, exe in NODES],
     ])

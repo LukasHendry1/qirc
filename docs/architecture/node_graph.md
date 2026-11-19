@@ -32,7 +32,8 @@ flowchart LR
     end
 
     subgraph PER["Perception"]
-        OD["object_detection"]
+        FD["front_detection<br/>(YOLO)"]
+        RD["rear_detection"]
         UD["user_detection"]
     end
 
@@ -60,8 +61,8 @@ flowchart LR
     PB <-->|"USB serial"| PICO
 
     %% Sensors
-    FC -->|"/front_camera/color/image_raw<br/>/front_camera/aligned_depth_to_color/image_raw"| OD
-    RC -->|"/rear_camera/nn/spatial_detections"| OD
+    FC -->|"/front_camera/color/image_raw<br/>/front_camera/aligned_depth_to_color/image_raw<br/>/front_camera/color/camera_info"| FD
+    RC -->|"/rear_camera/nn/spatial_detections"| RD
     FC -->|"/front_camera/imu"| EKF
     LIDAR -->|"/scan"| SLAM
     LIDAR -->|"/scan"| LP
@@ -76,8 +77,10 @@ flowchart LR
     SLAM -.->|"map to odom"| TF
 
     %% Perception
-    OD -->|"/detections"| UD
-    OD -->|"/detections"| LP
+    FD -->|"/detections"| UD
+    RD -->|"/detections"| UD
+    FD -->|"/detections"| LP
+    RD -->|"/detections"| LP
     UD -->|"/user_info"| VM
     UD -->|"/user_info"| GP
     UD -->|"/user_info"| PD
