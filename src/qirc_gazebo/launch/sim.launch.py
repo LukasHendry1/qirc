@@ -1,6 +1,10 @@
 """
 Launch the QIRC simulation in Gazebo Fortress.
 
+Starts Gazebo with a world, publishes the robot model (with its Gazebo parts,
+sim:=true) from robot_state_publisher on simulation time, and spawns the
+robot from /robot_description.
+
 Arguments:
     world (default obstacles.sdf): world file in qirc_gazebo/worlds.
         obstacles.sdf has a few walls and boxes for the LiDAR to see;
@@ -12,6 +16,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
+from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
@@ -33,6 +38,20 @@ def generate_launch_description():
         }.items(),
     )
 
+    robot_description = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(PathJoinSubstitution([
+            FindPackageShare('qirc_description'), 'launch', 'description.launch.py',
+        ])),
+        launch_arguments={'sim': 'true', 'use_sim_time': 'true'}.items(),
+    )
+    # Spawned slightly above the ground so the wheels don't start inside it.
+    spawn = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-topic', 'robot_description', '-name', 'qirc', '-z', '0.02'],
+        output='screen',
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'world', default_value='obstacles.sdf',
@@ -41,4 +60,6 @@ def generate_launch_description():
             'headless', default_value='false',
             description='Run the Gazebo server only, without the GUI'),
         gazebo,
+        robot_description,
+        spawn,
     ])

@@ -15,9 +15,25 @@ EXPECTED_LINKS = {
 }
 
 
+def _expand(sim):
+    mappings = {'sim': 'true' if sim else 'false'}
+    return ET.fromstring(xacro.process_file(str(URDF_FILE), mappings=mappings).toxml())
+
+
+# Every general test runs on both the real model and the simulation model.
+@pytest.fixture(scope='module', params=[False, True], ids=['real', 'sim'])
+def robot(request):
+    return _expand(request.param)
+
+
 @pytest.fixture(scope='module')
-def robot():
-    return ET.fromstring(xacro.process_file(str(URDF_FILE)).toxml())
+def real_robot():
+    return _expand(False)
+
+
+@pytest.fixture(scope='module')
+def sim_robot():
+    return _expand(True)
 
 
 def test_expected_links_present(robot):
@@ -139,3 +155,82 @@ def test_laser_above_chassis(robot):
     (_, y, z), _ = _joint_to(robot, 'laser')
     assert z > top
     assert y == pytest.approx(0.0)
+
+
+# ===== Simulation (sim:=true) ================================================
+
+def _wheel_joints(robot):
+    return [j for j in robot.findall('joint') if j.get('type') == 'continuous']
+
+
+def _plugin(robot, system):
+    for plugin in robot.findall('gazebo/plugin'):
+        if plugin.get('name') == f'ignition::gazebo::systems::{system}':
+            return plugin
+    raise AssertionError(f'no {system} plugin')
+
+
+def test_real_model_has_no_gazebo_parts(real_robot):
+    # The real robot's model and TF must not change because of the simulation.
+    assert real_robot.find('gazebo') is None
+    assert not _wheel_joints(real_robot)
+    names = {link.get('name') for link in real_robot.findall('link')}
+    assert names == EXPECTED_LINKS
+
+
+def test_real_tracks_have_collisions(real_robot):
+    for side in ('left', 'right'):
+        track = next(link for link in real_robot.findall('link')
+                     if link.get('name') == f'{side}_track_link')
+        assert track.findall('collision')
+
+
+def test_sim_tracks_have_no_collisions(sim_robot):
+    # The road wheels touch the ground instead.
+    for side in ('left', 'right'):
+        track = next(link for link in sim_robot.findall('link')
+                     if link.get('name') == f'{side}_track_link')
+        assert not track.findall('collision')
+
+
+def test_sim_wheels_touch_the_ground(sim_robot):
+    wheels = _wheel_joints(sim_robot)
+    assert len(wheels) >= 4
+    for joint in wheels:
+        track = joint.find('parent').get('link')
+        assert track.endswith('_track_link')
+        (_, _, track_z), _ = _joint_to(sim_robot, track)
+        wheel_z = float(joint.find('origin').get('xyz').split()[2])
+        link = next(link for link in sim_robot.findall('link')
+                    if link.get('name') == joint.find('child').get('link'))
+        radius = float(link.find('collision/geometry/cylinder').get('radius'))
+        assert track_z + wheel_z - radius == pytest.approx(0.0), joint.get('name')
+        assert joint.find('axis').get('xyz').split() == ['0', '1', '0']
+
+
+def test_diff_drive_drives_every_wheel_on_the_right_side(sim_robot):
+    plugin = _plugin(sim_robot, 'DiffDrive')
+    for side in ('left', 'right'):
+        listed = {e.text for e in plugin.findall(f'{side}_joint')}
+        wheels = {j.get('name') for j in _wheel_joints(sim_robot)
+                  if j.find('parent').get('link') == f'{side}_track_link'}
+        assert listed == wheels, side
+
+
+def test_diff_drive_geometry_matches_the_tracks(sim_robot):
+    plugin = _plugin(sim_robot, 'DiffDrive')
+    (_, left_y, track_z), _ = _joint_to(sim_robot, 'left_track_link')
+    (_, right_y, _), _ = _joint_to(sim_robot, 'right_track_link')
+    assert float(plugin.findtext('wheel_separation')) == pytest.approx(left_y - right_y)
+    assert float(plugin.findtext('wheel_radius')) == pytest.approx(track_z)
+
+
+def test_diff_drive_topics_and_frames(sim_robot):
+    # Must match qirc_gazebo/config/bridge.yaml and REP 105.
+    plugin = _plugin(sim_robot, 'DiffDrive')
+    assert plugin.findtext('topic') == '/cmd_vel'
+    assert plugin.findtext('odom_topic') == '/odom'
+    assert plugin.findtext('tf_topic') == '/odom/tf'
+    assert plugin.findtext('frame_id') == 'odom'
+    assert plugin.findtext('child_frame_id') == 'base_link'
+    assert _plugin(sim_robot, 'JointStatePublisher').findtext('topic') == '/joint_states'

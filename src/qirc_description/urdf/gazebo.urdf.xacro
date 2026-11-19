@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo (Fortress) parts of the robot model. Included by qirc.urdf.xacro
+  only with sim:=true, so the real robot's model has none of this.
+
+  Tracks: URDF has no track model, so each track is a row of road wheels
+  (collision only, no visual: it still looks like a track) driven by the
+  DiffDrive system. Good enough on flat ground for mapping and navigation;
+  stair climbing needs the TrackedVehicle system instead (#84).
+
+  Gazebo topics (bridged to ROS by qirc_gazebo/config/bridge.yaml):
+    /cmd_vel        in   geometry_msgs/Twist
+    /odom           out  nav_msgs/Odometry, odom -> base_link
+    /odom/tf        out  the same pose as TF; sim.launch.py bridges it to
+                         /tf unless publish_odom_tf:=false (the EKF, #54)
+    /joint_states   out  wheel joints, for robot_state_publisher
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===== Road wheels ===================================================== -->
+  <!-- Wheels per track, spread evenly between the two sprocket centres. -->
+  <xacro:property name="road_wheel_count" value="4"/>
+  <xacro:property name="road_wheel_mass" value="0.2"/>
+  <!-- Friction against the ground. Skid-steer turning drags the wheels
+       sideways, so too much friction makes turning on the spot stall. -->
+  <xacro:property name="road_wheel_mu" value="0.8"/>
+
+  <!-- Wheel radius = track radius, so the wheels touch the ground exactly
+       where the track bottom is (z = 0). -->
+  <xacro:property name="road_wheel_radius" value="${track_radius}"/>
+  <xacro:property name="road_wheel_spacing"
+                  value="${track_straight / (road_wheel_count - 1)}"/>
+
+  <xacro:macro name="road_wheel" params="side i">
+    <link name="${side}_wheel_${i}_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi / 2} 0 0"/>
+        <geometry>
+          <cylinder radius="${road_wheel_radius}" length="${track_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="${road_wheel_mass}"/>
+        <!-- Solid cylinder whose axis is y. -->
+        <inertia ixx="${road_wheel_mass * (3 * road_wheel_radius ** 2 + track_width ** 2) / 12}"
+                 ixy="0" ixz="0"
+                 iyy="${road_wheel_mass * road_wheel_radius ** 2 / 2}"
+                 iyz="0"
+                 izz="${road_wheel_mass * (3 * road_wheel_radius ** 2 + track_width ** 2) / 12}"/>
+      </inertial>
+    </link>
+
+    <joint name="${side}_wheel_${i}_joint" type="continuous">
+      <parent link="${side}_track_link"/>
+      <child link="${side}_wheel_${i}_link"/>
+      <origin xyz="${-track_straight / 2 + i * road_wheel_spacing} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+
+    <gazebo reference="${side}_wheel_${i}_link">
+      <mu1>${road_wheel_mu}</mu1>
+      <mu2>${road_wheel_mu}</mu2>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Wheels i = n-1 ... 0 of one track (xacro has no loops). -->
+  <xacro:macro name="road_wheels" params="side i">
+    <xacro:road_wheel side="${side}" i="${i}"/>
+    <xacro:if value="${i > 0}">
+      <xacro:road_wheels side="${side}" i="${i - 1}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- <left_joint> / <right_joint> entries for every wheel of one track. -->
+  <xacro:macro name="diff_drive_joints" params="side i">
+    <xacro:element xacro:name="${side}_joint">${side}_wheel_${i}_joint</xacro:element>
+    <xacro:if value="${i > 0}">
+      <xacro:diff_drive_joints side="${side}" i="${i - 1}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <xacro:road_wheels side="left" i="${road_wheel_count - 1}"/>
+  <xacro:road_wheels side="right" i="${road_wheel_count - 1}"/>
+
+  <!-- ===== Systems ========================================================= -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-diff-drive-system"
+            name="ignition::gazebo::systems::DiffDrive">
+      <xacro:diff_drive_joints side="left" i="${road_wheel_count - 1}"/>
+      <xacro:diff_drive_joints side="right" i="${road_wheel_count - 1}"/>
+      <!-- Track centre to track centre. The real robot's effective value is
+           wider because the tracks skid (#57). -->
+      <wheel_separation>${2 * track_y}</wheel_separation>
+      <wheel_radius>${road_wheel_radius}</wheel_radius>
+      <topic>/cmd_vel</topic>
+      <odom_topic>/odom</odom_topic>
+      <tf_topic>/odom/tf</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <odom_publish_frequency>50</odom_publish_frequency>
+    </plugin>
+
+    <plugin filename="ignition-gazebo-joint-state-publisher-system"
+            name="ignition::gazebo::systems::JointStatePublisher">
+      <topic>/joint_states</topic>
+    </plugin>
+  </gazebo>
+
+</robot>

@@ -4,7 +4,7 @@ import importlib.util
 from pathlib import Path
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch_ros.actions import Node
 import yaml
 
@@ -27,6 +27,12 @@ def _node_executables(entities):
 
 def test_description_launch_starts_robot_state_publisher():
     assert _node_executables(_load('description.launch.py')) == {'robot_state_publisher'}
+
+
+def test_description_launch_has_sim_argument():
+    arguments = {e.name: e.default_value[0].text for e in _load('description.launch.py')
+                 if isinstance(e, DeclareLaunchArgument)}
+    assert arguments == {'use_sim_time': 'false', 'sim': 'false'}
 
 
 def test_display_launch_starts_rviz_and_includes_description():
