@@ -8,16 +8,17 @@ The message types used between QIRC nodes. See [nodes.md](nodes.md) for which no
 
 | Topic | Type | From → To |
 |---|---|---|
-| `/front_camera/color/image_raw` | `sensor_msgs/Image` | front_camera → object_detection, web_video_server |
-| `/front_camera/aligned_depth_to_color/image_raw` | `sensor_msgs/Image` | front_camera → object_detection |
+| `/front_camera/color/image_raw` | `sensor_msgs/Image` | front_camera → front_detection, web_video_server |
+| `/front_camera/aligned_depth_to_color/image_raw` | `sensor_msgs/Image` | front_camera → front_detection |
+| `/front_camera/color/camera_info` | `sensor_msgs/CameraInfo` | front_camera → front_detection (intrinsics for 3D positions) |
 | `/front_camera/imu` | `sensor_msgs/Imu` | front_camera → ekf |
 | `/rear_camera/rgb/image_raw` | `sensor_msgs/Image` | rear_camera → web_video_server |
-| `/rear_camera/nn/spatial_detections` | `vision_msgs/Detection3DArray` | rear_camera → object_detection |
+| `/rear_camera/nn/spatial_detections` | `vision_msgs/Detection3DArray` | rear_camera → rear_detection |
 | `/scan` | `sensor_msgs/LaserScan` | rplidar → slam_toolbox, local_planner |
 | `/odom` | `nav_msgs/Odometry` | qirc_pico_bridge → ekf (raw track odometry) |
 | `/odometry/filtered` | `nav_msgs/Odometry` | ekf → control |
 | `/map` | `nav_msgs/OccupancyGrid` | slam_toolbox → global_planner |
-| `/detections` | `vision_msgs/Detection3DArray` | object_detection → user_detection, local_planner |
+| `/detections` | `vision_msgs/Detection3DArray` | front_detection, rear_detection → user_detection, local_planner |
 | `/plan` | `nav_msgs/Path` | global_planner → local_planner |
 | `/local_plan` | `nav_msgs/Path` | local_planner → control |
 | `/cmd_vel_nav` | `geometry_msgs/Twist` | control → twist_mux |

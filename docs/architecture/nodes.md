@@ -41,10 +41,11 @@ Standard packages, configured in this repo.
 
 | Node | Status | Subscribes | Publishes |
 |---|---|---|---|
-| `object_detection` | stub | `/front_camera/color/image_raw`, `/front_camera/aligned_depth_to_color/image_raw`, `/rear_camera/nn/spatial_detections` | `/detections` |
+| `front_detection` | integrated (#67) | `/front_camera/color/image_raw`, `/front_camera/aligned_depth_to_color/image_raw`, `/front_camera/color/camera_info` | `/detections` |
+| `rear_detection` | planned (#69) | `/rear_camera/nn/spatial_detections` | `/detections` |
 | `user_detection` | planned (#70) | `/detections` | `/user_info` |
 
-`object_detection` runs YOLO on the front camera (#67, #68) and republishes the rear OAK's on-camera detections (#69). Both go out on `/detections`. Classes: person, object, stairwell.
+`front_detection` runs YOLO11n on the front camera (#67; TensorRT on the Orin in #68). `rear_detection` republishes the rear OAK's on-camera detections (#69). Both publish on `/detections`, each in its own camera's optical frame, with the label `person` or `object` (`stairwell` comes with #71). Setup and details: [qirc_perception/README.md](../../src/qirc_perception/README.md).
 
 ## Localization (`qirc_localization`)
 
