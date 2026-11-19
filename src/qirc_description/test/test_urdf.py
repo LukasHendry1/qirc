@@ -1,5 +1,6 @@
 """Check that the robot model expands with xacro and forms a valid URDF tree."""
 
+import math
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -8,7 +9,10 @@ import xacro
 
 URDF_FILE = Path(__file__).resolve().parents[1] / 'urdf' / 'qirc.urdf.xacro'
 
-EXPECTED_LINKS = {'base_link', 'chassis_link', 'left_track_link', 'right_track_link'}
+EXPECTED_LINKS = {
+    'base_link', 'chassis_link', 'left_track_link', 'right_track_link',
+    'front_camera_link', 'rear_camera_link', 'laser',
+}
 
 
 @pytest.fixture(scope='module')
@@ -85,3 +89,53 @@ def test_tracks_are_symmetric_and_on_the_ground(robot):
     track = next(link for link in robot.findall('link') if link.get('name') == 'left_track_link')
     radius = float(track.find('visual/geometry/cylinder').get('radius'))
     assert left[2] == pytest.approx(radius), 'track bottom must touch z = 0 (the ground)'
+
+
+def _joint_to(robot, child):
+    """Return (xyz, rpy) of the joint whose child is the given link."""
+    joint = next(j for j in robot.findall('joint') if j.find('child').get('link') == child)
+    origin = joint.find('origin')
+    xyz = [float(v) for v in origin.get('xyz').split()]
+    rpy = [float(v) for v in origin.get('rpy', '0 0 0').split()]
+    return xyz, rpy
+
+
+def _chassis_bounds(robot):
+    """Return (front x, back x, top z) of the chassis in base_link."""
+    chassis = next(link for link in robot.findall('link') if link.get('name') == 'chassis_link')
+    length, _, height = (float(v) for v in chassis.find('visual/geometry/box').get('size').split())
+    (x, _, z), _ = _joint_to(robot, 'chassis_link')
+    return x + length / 2, x - length / 2, z + height / 2
+
+
+def test_sensors_attached_to_base_link(robot):
+    for sensor in ('front_camera_link', 'rear_camera_link', 'laser'):
+        joint = next(j for j in robot.findall('joint') if j.find('child').get('link') == sensor)
+        assert joint.find('parent').get('link') == 'base_link'
+        assert joint.get('type') == 'fixed'
+
+
+def test_front_camera_on_front_face_facing_forward(robot):
+    front, _, top = _chassis_bounds(robot)
+    (x, y, z), (_, _, yaw) = _joint_to(robot, 'front_camera_link')
+    assert x > front, 'front camera must be at or ahead of the chassis front'
+    assert y == pytest.approx(0.0)
+    assert 0 < z <= top
+    assert yaw == pytest.approx(0.0)
+
+
+def test_rear_camera_on_back_face_facing_backward(robot):
+    _, back, top = _chassis_bounds(robot)
+    (x, y, z), (_, _, yaw) = _joint_to(robot, 'rear_camera_link')
+    assert x < back, 'rear camera must be at or behind the chassis back'
+    assert y == pytest.approx(0.0)
+    assert 0 < z <= top
+    assert abs(yaw) == pytest.approx(math.pi)
+
+
+def test_laser_above_chassis(robot):
+    # The scan plane must clear the chassis top for an unobstructed 360 degree view.
+    _, _, top = _chassis_bounds(robot)
+    (_, y, z), _ = _joint_to(robot, 'laser')
+    assert z > top
+    assert y == pytest.approx(0.0)
