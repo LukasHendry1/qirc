@@ -5,7 +5,7 @@ Camera drivers and detection for the QIRC. Detections from both cameras are publ
 | Node | Camera | Status |
 |---|---|---|
 | `front_detection` | RealSense D435i (front) | YOLO11n on the colour image; distance from the aligned depth image |
-| `rear_detection` | OAK-D Lite (back) | Planned (#69): republishes the OAK's on-camera detections |
+| `rear_detection` | OAK-D Lite (back) | Republishes the OAK's on-camera detections (stock MobileNet-SSD), relabelled |
 
 ## Setup: Ultralytics (YOLO)
 
@@ -36,7 +36,11 @@ ros2 launch qirc_bringup qirc.launch.py use_front_detection:=false
 
 To view the detections, add a `Detection3DArray` display for `/detections` in Foxglove.
 
-## How the 3D position is found
+## Rear camera detections
+
+The OAK-D Lite runs MobileNet-SSD on the camera itself, and the depthai driver publishes `/rear_camera/nn/spatial_detections` with 3D positions already in place. The driver labels each detection with a class number (VOC classes, where 15 is person). `rear_detection` turns these into `person` / `object`, using the class names from the same model config the driver loads (`nn_config`, which must match `i_nn_config_path` in `rear_camera.yaml`). It drops results below `min_confidence`, and leaves positions unchanged. It needs no extra installs.
+
+## How the 3D position is found (front camera)
 
 For each YOLO box, `front_detection`:
 1. Takes the median depth of the central half of the box. This ignores the background around the object's edges, and pixels with no depth reading.

@@ -69,6 +69,14 @@ def generate_launch_description():
         output='screen',
         condition=IfCondition(LaunchConfiguration('use_front_detection')),
     )
+    rear_detection = Node(
+        package='qirc_perception',
+        executable='rear_detection_node',
+        parameters=[PathJoinSubstitution([
+            FindPackageShare('qirc_perception'), 'config', 'rear_detection.yaml',
+        ])],
+        output='screen',
+    )
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -88,5 +96,6 @@ def generate_launch_description():
         rear_camera,
         lidar,
         front_detection,
+        rear_detection,
         *[Node(package=pkg, executable=exe, output='screen') for pkg, exe in NODES],
     ])
