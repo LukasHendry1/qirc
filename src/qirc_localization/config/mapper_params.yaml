@@ -18,6 +18,10 @@ slam_toolbox:
     scan_topic: /scan
 
     # ===== LiDAR: RPLIDAR A2M8 (0.15-12 m, 10 Hz) ==========================
+    # The A2M8 reads from 0.15 m; slam_toolbox warns unless this is above
+    # the driver's range_min (a float32 just over 0.15). Nothing outside the
+    # robot is within 0.2 m of the LiDAR, which sits centred on top.
+    min_laser_range: 0.2
     max_laser_range: 12.0
     # Process every scan (the A2M8 is only 10 Hz).
     throttle_scans: 1
@@ -28,15 +32,15 @@ slam_toolbox:
     # watched growing in RViz while driving.
     map_update_interval: 2.0
 
-    # ===== When to add a scan to the map ===================================
-    # A scan is used once the robot has moved this far or turned this much
-    # since the last one. Turning is kept small because track odometry
-    # overestimates turns (about 1.4x in simulation, #57): the scan matcher
-    # must correct the heading error before it grows past its search window
-    # (coarse_search_angle_offset, default 0.349 rad).
-    minimum_travel_distance: 0.3   # m
-    minimum_travel_heading: 0.3    # rad
-    minimum_time_interval: 0.5     # s
+    # When to add a scan: the defaults (minimum_travel_distance and
+    # minimum_travel_heading 0.5) are kept. Note that slam_toolbox only
+    # checks distance before adding a scan, so it adds NONE while the robot
+    # turns on the spot: the heading through such a turn comes from
+    # odometry alone, and the next scan match can only correct about
+    # +-20 degrees (coarse_search_angle_offset). The track odometry's turns
+    # must therefore be calibrated (effective track width, #57; in
+    # simulation, track_skid_factor in qirc_description's gazebo.urdf.xacro)
+    # and, on the real robot, fused with the IMU gyro (#54).
 
     # Allow for the simulation clock and a busy Jetson.
     transform_timeout: 0.2

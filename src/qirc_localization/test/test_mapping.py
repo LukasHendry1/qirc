@@ -38,17 +38,11 @@ def test_frames_and_topics(params):
     assert params['scan_topic'] == '/scan'
 
 
-def test_laser_range_within_a2m8(params):
-    # The A2M8 (and the simulated one) reads up to 12 m.
-    assert 0 < params['max_laser_range'] <= 12.0
-
-
-def test_turn_threshold_within_scan_matcher_search(params):
-    # Track odometry overestimates turns by about 1.4x. The heading error
-    # between two scans must stay inside the scan matcher's angular search
-    # window, or the match fails.
-    window = params.get('coarse_search_angle_offset', 0.349)
-    assert 0.4 * params['minimum_travel_heading'] < window
+def test_laser_range_matches_a2m8(params):
+    # The A2M8 (and the simulated one) reads 0.15-12 m. min_laser_range must
+    # be above 0.15 or slam_toolbox warns on every start.
+    assert 0.15 < params['min_laser_range'] <= 0.3
+    assert params['max_laser_range'] == 12.0
 
 
 def test_launch_starts_slam_toolbox_and_optional_rviz():
