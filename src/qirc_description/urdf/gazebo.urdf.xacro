@@ -26,6 +26,16 @@
        sideways, so too much friction makes turning on the spot stall. -->
   <xacro:property name="road_wheel_mu" value="0.8"/>
 
+  <!-- Effective track separation for DiffDrive = physical separation x this.
+       Skid-steer tracks turn less than their wheel speeds suggest, because
+       the wheels slide sideways; with the physical separation, /odom
+       overestimated turns by 1.40x. Calibrating it (as #57 does on the real
+       robot) makes /odom's turns match the true ones to within ~3 degrees
+       per half turn, which slam_toolbox needs: it adds no scans while turning
+       on the spot, so odometry alone has to carry the heading through a turn.
+       Re-measure if road_wheel_mu or the wheel layout changes. -->
+  <xacro:property name="track_skid_factor" value="1.40"/>
+
   <!-- Wheel radius = track radius, so the wheels touch the ground exactly
        where the track bottom is (z = 0). -->
   <xacro:property name="road_wheel_radius" value="${track_radius}"/>
@@ -138,9 +148,9 @@
             name="ignition::gazebo::systems::DiffDrive">
       <xacro:diff_drive_joints side="left" i="${road_wheel_count - 1}"/>
       <xacro:diff_drive_joints side="right" i="${road_wheel_count - 1}"/>
-      <!-- Track centre to track centre. The real robot's effective value is
-           wider because the tracks skid (#57). -->
-      <wheel_separation>${2 * track_y}</wheel_separation>
+      <!-- Effective separation: track centre to track centre, widened for
+           skid (see track_skid_factor). -->
+      <wheel_separation>${2 * track_y * track_skid_factor}</wheel_separation>
       <wheel_radius>${road_wheel_radius}</wheel_radius>
       <topic>/cmd_vel</topic>
       <odom_topic>/odom</odom_topic>
