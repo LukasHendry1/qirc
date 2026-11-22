@@ -25,8 +25,6 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 NODES = [
-    ('qirc_localization', 'mapping_node'),
-    ('qirc_localization', 'localization_node'),
     ('qirc_planning', 'vehicle_manager_node'),
     ('qirc_planning', 'global_planner_node'),
     ('qirc_planning', 'local_planner_node'),

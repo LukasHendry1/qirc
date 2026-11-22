@@ -25,8 +25,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'mapping_node = qirc_localization.mapping_node:main',
-            'localization_node = qirc_localization.localization_node:main',
+            'save_map = qirc_localization.save_map:main',
         ],
     },
 )

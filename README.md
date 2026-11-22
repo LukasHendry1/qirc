@@ -56,8 +56,8 @@ Uses camera input from the RealSense D435i and the OAK-D Lite to detect objects,
 
 Uses the RPLIDAR A2M8 (through Slamtec's `rplidar_ros` driver) to build a map of the home and determine where the robot is within it.
 
-- **Mapping Node**: Builds the map using SLAM (`slam_toolbox`). No prior map of the home is assumed, so the robot maps the space on first deployment.
-- **Localization Node**: Loads the saved map and estimates the robot's pose within it (`slam_toolbox` localization mode).
+- **Mapping**: Builds the map using SLAM (`slam_toolbox`). No prior map of the home is assumed, so the robot maps the space on first deployment, and the map is saved.
+- **Localization**: Loads the saved map and estimates the robot's pose within it (`slam_toolbox` localization mode).
 
 ### Planning Package
 
@@ -115,10 +115,17 @@ ros2 launch qirc_gazebo sim.launch.py
 ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it (/cmd_vel)
 ```
 
-To build a map while driving, run this as well:
+To build a map while driving, run this as well, and save the map when it's done (to `~/qirc_maps/house` unless you give a path):
 
 ```bash
 ros2 launch qirc_localization mapping.launch.py use_sim_time:=true rviz:=true
+ros2 run qirc_localization save_map ~/qirc_maps/sim_obstacles
+```
+
+On later runs, localize in the saved map instead. The robot should start where mapping started; if it doesn't, give its pose with RViz's **2D Pose Estimate**.
+
+```bash
+ros2 launch qirc_localization localization.launch.py use_sim_time:=true rviz:=true map:=$HOME/qirc_maps/sim_obstacles
 ```
 
 See [`src/qirc_gazebo`](src/qirc_gazebo/README.md) for the worlds, topics and options.

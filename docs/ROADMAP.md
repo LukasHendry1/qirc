@@ -87,7 +87,8 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 - [ ] `now` **Sensor fusion**: `robot_localization` EKF combining track odometry and the D435i IMU (develop in simulation)
 - [x] `now` **Mapping**: `slam_toolbox` in simulation
-- [ ] `now` Decide whether `mapping_node` / `localization_node` stay custom or become wrappers or config around existing tools
+- [x] `now` **Map save and load**: save the map and localize in it with `slam_toolbox`, in simulation
+- [x] `now` Decide whether `mapping_node` / `localization_node` stay custom or become wrappers or config around existing tools (config: both modes run straight from `slam_toolbox`)
 - [ ] `robot` Map the real house or lab; save the map and load it on startup
 - [ ] `robot` Localize within the saved map; test re-localization after the robot is moved by hand
 
