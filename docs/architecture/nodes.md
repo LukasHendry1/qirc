@@ -61,9 +61,12 @@ Standard packages, configured in this repo.
 
 | Node | Package | Status | Subscribes | Publishes |
 |---|---|---|---|---|
-| `slam_toolbox` | `slam_toolbox` | integrated, mapping mode, in simulation (#55) | `/scan`, TF `odom → base_link` | `/map`, TF: `map → odom` |
+| `slam_toolbox` | `slam_toolbox` | integrated, mapping and localization modes, in simulation (#55, #56) | `/scan`, TF `odom → base_link`, `/initialpose` | `/map`, TF: `map → odom` |
 
-Mapping mode builds the house map (`ros2 launch qirc_localization mapping.launch.py`, parameters in `config/mapper_params.yaml`). Saving it, and localization mode loading it on later runs, is #56. The current `mapping_node` and `localization_node` stubs will be replaced by, or become wrappers around, `slam_toolbox`.
+`slam_toolbox` runs in one of two modes, both configured in `qirc_localization` (there are no custom mapping or localization nodes):
+
+- **Mapping** builds the house map (`mapping.launch.py`, parameters in `config/mapper_params.yaml`). `ros2 run qirc_localization save_map [path]` saves it, by default to `~/qirc_maps/house`: the pose graph (`.posegraph`, `.data`) for localization, and an occupancy grid (`.pgm`, `.yaml`) for Nav2's `map_server`.
+- **Localization** loads the saved map and tracks the robot in it without changing the map (`localization.launch.py map:=<path>`, with `config/localization_params.yaml` on top). The robot is expected to start where mapping started (the map origin). If it doesn't, give its pose on `/initialpose` (RViz's 2D Pose Estimate); slam_toolbox can't find the robot on the map by itself.
 
 ## Planning and control (`qirc_planning`, `qirc_control`)
 

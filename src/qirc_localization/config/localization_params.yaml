@@ -1,0 +1,22 @@
+# slam_toolbox localization-mode parameters, loaded by
+# launch/localization.launch.py on top of mapper_params.yaml (frames, LiDAR
+# range, map resolution and the rest are shared with mapping).
+#
+# Localization mode loads a saved pose graph (map_file_name, set by the
+# launch file) and matches scans against it without changing the saved map.
+
+slam_toolbox:
+  ros__parameters:
+    mode: localization
+
+    # Start where mapping started: the map frame's origin is the robot's
+    # pose when mapping began, so the robot is expected at that home spot
+    # when it starts. If it is somewhere else, give its pose with RViz's
+    # "2D Pose Estimate" (/initialpose). (map_start_at_dock does the same in
+    # mapping mode, but localization mode ignores it.)
+    map_start_pose: [0.0, 0.0, 0.0]
+
+    # slam_toolbox's own localization defaults
+    # (mapper_params_localization.yaml in the slam_toolbox package).
+    scan_buffer_size: 3
+    loop_match_minimum_chain_size: 3
