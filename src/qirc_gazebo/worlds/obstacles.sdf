@@ -23,6 +23,9 @@
             name="ignition::gazebo::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
+    <!-- Needed by the IMU in the D435i. -->
+    <plugin filename="ignition-gazebo-imu-system"
+            name="ignition::gazebo::systems::Imu"/>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>

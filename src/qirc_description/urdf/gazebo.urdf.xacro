@@ -12,9 +12,15 @@
     /cmd_vel        in   geometry_msgs/Twist
     /odom           out  nav_msgs/Odometry, odom -> base_link
     /odom/tf        out  the same pose as TF; sim.launch.py bridges it to
-                         /tf unless publish_odom_tf:=false (the EKF, #54)
+                         /tf only with ekf:=false (otherwise the EKF
+                         publishes odom -> base_link)
     /joint_states   out  wheel joints, for robot_state_publisher
     /scan           out  sensor_msgs/LaserScan in frame laser, like rplidar_ros
+    /front_camera/image, /front_camera/depth_image, /front_camera/camera_info
+                    out  the D435i's colour image and aligned depth; bridged
+                         to realsense2_camera's topic names
+    /front_camera/imu
+                    out  sensor_msgs/Imu, gyro and accelerometer, like the D435i
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -139,6 +145,140 @@
           <stddev>${lidar_noise}</stddev>
         </noise>
       </lidar>
+    </sensor>
+  </gazebo>
+
+  <!-- ===== Front camera: RealSense D435i ==================================== -->
+  <!-- Set up like the real camera with qirc_perception/config/front_camera.yaml,
+       so the same nodes run on both. Specs from Intel's D400 datasheet.
+
+       Frames: on the real robot, realsense2_camera publishes the frames below
+       front_camera_link itself (as front_camera_*, once camera_name is set,
+       #22). In simulation they are here instead, at the offsets from Intel's
+       realsense2_description (_d435.urdf.xacro, _d435i_imu_modules.urdf.xacro),
+       which treats front_camera_link as the depth camera's origin. -->
+  <xacro:property name="d435i_color_y" value="0.015"/>   <!-- depth -> colour -->
+  <xacro:property name="d435i_imu_xyz" value="-0.01174 -0.00552 0.0051"/>
+  <!-- From an x-forward frame to an optical frame (z forward, x right, y down). -->
+  <xacro:property name="optical_rpy" value="${-pi / 2} 0 ${-pi / 2}"/>
+
+  <!-- Colour image and depth aligned to it (align_depth: true), 848x480 at
+       30 fps. Gazebo's RGB-D camera has one field of view for both, the
+       colour camera's: aligned depth is cropped to it on the real camera too. -->
+  <xacro:property name="d435i_width" value="848"/>
+  <xacro:property name="d435i_height" value="480"/>
+  <xacro:property name="d435i_rate" value="30"/>
+  <xacro:property name="d435i_hfov" value="${69.4 * pi / 180}"/>  <!-- 69.4 x 42 deg -->
+  <!-- Min-Z at 848x480 (datasheet table 4-11); depth is usable to about 10 m. -->
+  <xacro:property name="d435i_depth_min" value="0.195"/>
+  <xacro:property name="d435i_depth_max" value="10.0"/>
+  <xacro:property name="d435i_image_noise" value="0.007"/>  <!-- stddev, 0-1 -->
+
+  <!-- IMU: BMI055 (BMI085 in newer units), reported as one sensor_msgs/Imu at
+       the gyro rate (unite_imu_method: 2). The driver publishes no
+       orientation. Noise from Bosch's noise densities (gyro 0.014 deg/s/rtHz,
+       accel 150 ug/rtHz) over ~half the output rate.
+       The gyro bias is an ESTIMATE until it is measured on the real camera
+       (#31): it is drawn at random for each run, and qirc_localization's
+       imu_bias node removes it while the robot stands still. -->
+  <xacro:property name="d435i_imu_rate" value="200"/>
+  <xacro:property name="d435i_gyro_noise" value="0.0024"/>   <!-- rad/s -->
+  <xacro:property name="d435i_gyro_bias" value="0.009"/>     <!-- rad/s, ~0.5 deg/s -->
+  <xacro:property name="d435i_accel_noise" value="0.01"/>    <!-- m/s^2 -->
+  <xacro:property name="d435i_accel_bias" value="0.05"/>     <!-- m/s^2 -->
+
+  <link name="front_camera_color_frame"/>
+  <joint name="front_camera_color_joint" type="fixed">
+    <parent link="front_camera_link"/>
+    <child link="front_camera_color_frame"/>
+    <origin xyz="0 ${d435i_color_y} 0" rpy="0 0 0"/>
+  </joint>
+  <link name="front_camera_color_optical_frame"/>
+  <joint name="front_camera_color_optical_joint" type="fixed">
+    <parent link="front_camera_color_frame"/>
+    <child link="front_camera_color_optical_frame"/>
+    <origin xyz="0 0 0" rpy="${optical_rpy}"/>
+  </joint>
+  <link name="front_camera_imu_frame"/>
+  <joint name="front_camera_imu_joint" type="fixed">
+    <parent link="front_camera_link"/>
+    <child link="front_camera_imu_frame"/>
+    <origin xyz="${d435i_imu_xyz}" rpy="0 0 0"/>
+  </joint>
+  <link name="front_camera_imu_optical_frame"/>
+  <joint name="front_camera_imu_optical_joint" type="fixed">
+    <parent link="front_camera_imu_frame"/>
+    <child link="front_camera_imu_optical_frame"/>
+    <origin xyz="0 0 0" rpy="${optical_rpy}"/>
+  </joint>
+
+  <xacro:macro name="imu_noise" params="stddev bias">
+    <noise type="gaussian">
+      <mean>0</mean>
+      <stddev>${stddev}</stddev>
+      <bias_mean>0</bias_mean>
+      <bias_stddev>${bias}</bias_stddev>
+    </noise>
+  </xacro:macro>
+
+  <!-- Sensor poses are relative to front_camera_link (the frames above have
+       no mass, so Gazebo merges them into it). -->
+  <gazebo reference="front_camera_link">
+    <!-- Gazebo cameras look along the sensor's x; the images are labelled
+         with the optical frame, like the driver's. -->
+    <sensor name="front_camera" type="rgbd_camera">
+      <pose>0 ${d435i_color_y} 0 0 0 0</pose>
+      <topic>/front_camera</topic>
+      <ignition_frame_id>front_camera_color_optical_frame</ignition_frame_id>
+      <update_rate>${d435i_rate}</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <camera>
+        <horizontal_fov>${d435i_hfov}</horizontal_fov>
+        <image>
+          <width>${d435i_width}</width>
+          <height>${d435i_height}</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>${d435i_depth_max}</far>
+        </clip>
+        <depth_camera>
+          <clip>
+            <near>${d435i_depth_min}</near>
+            <far>${d435i_depth_max}</far>
+          </clip>
+        </depth_camera>
+        <noise>
+          <type>gaussian</type>
+          <mean>0</mean>
+          <stddev>${d435i_image_noise}</stddev>
+        </noise>
+      </camera>
+    </sensor>
+
+    <!-- Rotated like the optical frame, so the readings are in the same axes
+         as the real IMU's (front_camera_imu_optical_frame). -->
+    <sensor name="front_camera_imu" type="imu">
+      <pose>${d435i_imu_xyz} ${optical_rpy}</pose>
+      <topic>/front_camera/imu</topic>
+      <ignition_frame_id>front_camera_imu_optical_frame</ignition_frame_id>
+      <update_rate>${d435i_imu_rate}</update_rate>
+      <always_on>true</always_on>
+      <imu>
+        <enable_orientation>false</enable_orientation>
+        <angular_velocity>
+          <x><xacro:imu_noise stddev="${d435i_gyro_noise}" bias="${d435i_gyro_bias}"/></x>
+          <y><xacro:imu_noise stddev="${d435i_gyro_noise}" bias="${d435i_gyro_bias}"/></y>
+          <z><xacro:imu_noise stddev="${d435i_gyro_noise}" bias="${d435i_gyro_bias}"/></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><xacro:imu_noise stddev="${d435i_accel_noise}" bias="${d435i_accel_bias}"/></x>
+          <y><xacro:imu_noise stddev="${d435i_accel_noise}" bias="${d435i_accel_bias}"/></y>
+          <z><xacro:imu_noise stddev="${d435i_accel_noise}" bias="${d435i_accel_bias}"/></z>
+        </linear_acceleration>
+      </imu>
     </sensor>
   </gazebo>
 

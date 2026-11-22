@@ -25,6 +25,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'imu_bias = qirc_localization.imu_bias:main',
             'save_map = qirc_localization.save_map:main',
         ],
     },

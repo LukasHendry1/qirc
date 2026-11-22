@@ -115,6 +115,8 @@ ros2 launch qirc_gazebo sim.launch.py
 ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it (/cmd_vel)
 ```
 
+This also starts the EKF, which fuses the track odometry with the simulated D435i's gyro (`ekf:=false` to use the raw odometry instead).
+
 To build a map while driving, run this as well, and save the map when it's done (to `~/qirc_maps/house` unless you give a path):
 
 ```bash

@@ -11,13 +11,15 @@ Arguments:
         obstacles.sdf has a few walls and boxes for the LiDAR to see;
         empty.sdf is just the ground.
     headless (default false): run the Gazebo server only, without the GUI.
-    publish_odom_tf (default true): publish DiffDrive's odom -> base_link
-        transform on /tf. Set to false when the EKF (#54) publishes it.
+    ekf (default true): fuse the odometry and the simulated D435i's gyro
+        with qirc_localization's EKF (ekf.launch.py), which then publishes
+        odom -> base_link. With ekf:=false, DiffDrive's odometry publishes
+        it instead.
 """
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
@@ -67,6 +69,14 @@ def generate_launch_description():
         }],
         output='screen',
     )
+    # Exactly one of these publishes odom -> base_link.
+    ekf = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(PathJoinSubstitution([
+            FindPackageShare('qirc_localization'), 'launch', 'ekf.launch.py',
+        ])),
+        launch_arguments={'use_sim_time': 'true'}.items(),
+        condition=IfCondition(LaunchConfiguration('ekf')),
+    )
     odom_tf_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -75,7 +85,7 @@ def generate_launch_description():
             'config_file': PathJoinSubstitution([config, 'bridge_odom_tf.yaml']),
             'use_sim_time': True,
         }],
-        condition=IfCondition(LaunchConfiguration('publish_odom_tf')),
+        condition=UnlessCondition(LaunchConfiguration('ekf')),
         output='screen',
     )
 
@@ -87,11 +97,12 @@ def generate_launch_description():
             'headless', default_value='false',
             description='Run the Gazebo server only, without the GUI'),
         DeclareLaunchArgument(
-            'publish_odom_tf', default_value='true',
-            description="Publish DiffDrive's odom -> base_link transform on /tf"),
+            'ekf', default_value='true',
+            description='Run the EKF (odometry + gyro); false: use the raw odometry'),
         gazebo,
         robot_description,
         spawn,
         bridge,
+        ekf,
         odom_tf_bridge,
     ])
