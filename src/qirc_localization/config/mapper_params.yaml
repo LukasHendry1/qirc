@@ -1,0 +1,47 @@
+# slam_toolbox (online async) parameters for building the house map.
+# Started by launch/mapping.launch.py.
+#
+# Only the parameters that differ from slam_toolbox's defaults, or that this
+# robot depends on, are set here; everything else is the slam_toolbox default
+# (see mapper_params_online_async.yaml in the slam_toolbox package).
+
+slam_toolbox:
+  ros__parameters:
+    mode: mapping
+
+    # ===== Frames and topics: must match the URDF and the drivers ==========
+    # map -> odom is published by slam_toolbox; odom -> base_link by the EKF
+    # (#54) or, in simulation for now, by Gazebo's DiffDrive.
+    map_frame: map
+    odom_frame: odom
+    base_frame: base_link
+    scan_topic: /scan
+
+    # ===== LiDAR: RPLIDAR A2M8 (0.15-12 m, 10 Hz) ==========================
+    # The A2M8 reads from 0.15 m; slam_toolbox warns unless this is above
+    # the driver's range_min (a float32 just over 0.15). Nothing outside the
+    # robot is within 0.2 m of the LiDAR, which sits centred on top.
+    min_laser_range: 0.2
+    max_laser_range: 12.0
+    # Process every scan (the A2M8 is only 10 Hz).
+    throttle_scans: 1
+
+    # ===== Map =============================================================
+    resolution: 0.05            # m per cell; fine enough for doorways
+    # Publish the map more often than the default (5 s) so it can be
+    # watched growing in RViz while driving.
+    map_update_interval: 2.0
+
+    # When to add a scan: the defaults (minimum_travel_distance and
+    # minimum_travel_heading 0.5) are kept. Note that slam_toolbox only
+    # checks distance before adding a scan, so it adds NONE while the robot
+    # turns on the spot: the heading through such a turn comes from
+    # odometry alone, and the next scan match can only correct about
+    # +-20 degrees (coarse_search_angle_offset). The track odometry's turns
+    # must therefore be calibrated (effective track width, #57; in
+    # simulation, track_skid_factor in qirc_description's gazebo.urdf.xacro)
+    # and, on the real robot, fused with the IMU gyro (#54).
+
+    # Allow for the simulation clock and a busy Jetson.
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0

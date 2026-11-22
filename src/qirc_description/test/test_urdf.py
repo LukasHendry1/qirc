@@ -221,7 +221,9 @@ def test_diff_drive_geometry_matches_the_tracks(sim_robot):
     plugin = _plugin(sim_robot, 'DiffDrive')
     (_, left_y, track_z), _ = _joint_to(sim_robot, 'left_track_link')
     (_, right_y, _), _ = _joint_to(sim_robot, 'right_track_link')
-    assert float(plugin.findtext('wheel_separation')) == pytest.approx(left_y - right_y)
+    # Wider than the physical separation to account for skid, but not absurdly.
+    ratio = float(plugin.findtext('wheel_separation')) / (left_y - right_y)
+    assert 1.0 <= ratio <= 2.0
     assert float(plugin.findtext('wheel_radius')) == pytest.approx(track_z)
 
 
