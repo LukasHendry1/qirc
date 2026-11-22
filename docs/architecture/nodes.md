@@ -27,7 +27,7 @@ The only node that talks to the Pico (one serial port, one owner). It relays com
 
 ## Simulation (`qirc_gazebo`)
 
-Replaces the sensor drivers and the hardware bridge when running in Gazebo Fortress (`ros2 launch qirc_gazebo sim.launch.py`). The topics and frames are the same as on the real robot.
+Replaces the sensor drivers and the hardware bridge when running in Gazebo Fortress (`ros2 launch qirc_gazebo sim.launch.py`, or the whole stack with `ros2 launch qirc_bringup qirc.launch.py use_sim:=true`). The topics and frames are the same as on the real robot.
 
 | Node | Package | Status | Subscribes | Publishes |
 |---|---|---|---|---|

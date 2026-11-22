@@ -38,7 +38,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
   - [x] Simulated 2D LiDAR
   - [x] Simulated RGB-D camera and IMU (#27)
   - [ ] House-like world: rooms, furniture, **a staircase**
-  - [ ] `use_sim:=true` in bringup to swap real drivers for the simulation
+  - [x] `use_sim:=true` in bringup to swap real drivers for the simulation (#29)
 - [ ] `now` **Visualization**: add `foxglove_bridge` to bringup (topics, camera feeds, LiDAR, teleop over the network)
 - [x] `now` **Project management**: turn this roadmap into GitHub Issues
 - [ ] `now` Group the issues into Milestones and assign owners

@@ -117,6 +117,12 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it (/cmd_vel)
 
 This also starts the EKF, which fuses the track odometry with the simulated D435i's gyro (`ekf:=false` to use the raw odometry instead).
 
+To run the **whole stack** in simulation instead of on the robot, use bringup with `use_sim:=true`. It starts the simulation in place of the robot model and sensor drivers, and runs every node on simulation time:
+
+```bash
+ros2 launch qirc_bringup qirc.launch.py use_sim:=true   # world:=..., headless:=true also work
+```
+
 To build a map while driving, run this as well, and save the map when it's done (to `~/qirc_maps/house` unless you give a path):
 
 ```bash
