@@ -36,7 +36,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
   - [x] Tracked robot: start with the `DiffDrive` system (road wheels)
   - [ ] Then switch to `TrackedVehicle` for stairs (#84, see [Tracks in simulation](#tracks-in-simulation))
   - [x] Simulated 2D LiDAR
-  - [ ] Simulated RGB-D camera and IMU (#27)
+  - [x] Simulated RGB-D camera and IMU (#27)
   - [ ] House-like world: rooms, furniture, **a staircase**
   - [ ] `use_sim:=true` in bringup to swap real drivers for the simulation
 - [ ] `now` **Visualization**: add `foxglove_bridge` to bringup (topics, camera feeds, LiDAR, teleop over the network)
@@ -85,7 +85,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Phase 4: Localization and mapping
 
-- [ ] `now` **Sensor fusion**: `robot_localization` EKF combining track odometry and the D435i IMU (develop in simulation)
+- [x] `now` **Sensor fusion**: `robot_localization` EKF combining track odometry and the D435i IMU (develop in simulation)
 - [x] `now` **Mapping**: `slam_toolbox` in simulation
 - [x] `now` **Map save and load**: save the map and localize in it with `slam_toolbox`, in simulation
 - [x] `now` Decide whether `mapping_node` / `localization_node` stay custom or become wrappers or config around existing tools (config: both modes run straight from `slam_toolbox`)

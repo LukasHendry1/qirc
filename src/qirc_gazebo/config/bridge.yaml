@@ -1,7 +1,7 @@
 # ros_gz_bridge topics between Gazebo and ROS, started by sim.launch.py.
 # The Gazebo topic names are set in qirc_description/urdf/gazebo.urdf.xacro.
-# DiffDrive's odom -> base_link TF is in bridge_odom_tf.yaml, so it can be
-# turned off (publish_odom_tf:=false) once the EKF (#54) publishes it.
+# DiffDrive's odom -> base_link TF is in bridge_odom_tf.yaml, which
+# sim.launch.py only starts with ekf:=false (otherwise the EKF publishes it).
 
 - ros_topic_name: /clock
   gz_topic_name: /clock
@@ -31,4 +31,38 @@
   gz_topic_name: /scan
   ros_type_name: sensor_msgs/msg/LaserScan
   gz_type_name: ignition.msgs.LaserScan
+  direction: GZ_TO_ROS
+
+# Front RealSense D435i, under realsense2_camera's topic names (with
+# align_depth: true), so qirc_perception's nodes run unchanged. Depth is
+# 32FC1 in metres (the real camera's is 16UC1 in mm; front_detection reads
+# both). The colour and aligned depth images share one camera_info.
+- ros_topic_name: /front_camera/color/image_raw
+  gz_topic_name: /front_camera/image
+  ros_type_name: sensor_msgs/msg/Image
+  gz_type_name: ignition.msgs.Image
+  direction: GZ_TO_ROS
+
+- ros_topic_name: /front_camera/color/camera_info
+  gz_topic_name: /front_camera/camera_info
+  ros_type_name: sensor_msgs/msg/CameraInfo
+  gz_type_name: ignition.msgs.CameraInfo
+  direction: GZ_TO_ROS
+
+- ros_topic_name: /front_camera/aligned_depth_to_color/image_raw
+  gz_topic_name: /front_camera/depth_image
+  ros_type_name: sensor_msgs/msg/Image
+  gz_type_name: ignition.msgs.Image
+  direction: GZ_TO_ROS
+
+- ros_topic_name: /front_camera/aligned_depth_to_color/camera_info
+  gz_topic_name: /front_camera/camera_info
+  ros_type_name: sensor_msgs/msg/CameraInfo
+  gz_type_name: ignition.msgs.CameraInfo
+  direction: GZ_TO_ROS
+
+- ros_topic_name: /front_camera/imu
+  gz_topic_name: /front_camera/imu
+  ros_type_name: sensor_msgs/msg/Imu
+  gz_type_name: ignition.msgs.IMU
   direction: GZ_TO_ROS

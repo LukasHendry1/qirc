@@ -1,0 +1,51 @@
+# robot_localization EKF: fuses the track odometry and the front camera's
+# gyro into odom -> base_link. Started by launch/ekf.launch.py.
+#
+# Why these inputs:
+#   - Track odometry is good for speed but bad for turns: the tracks skid
+#     sideways, so turns on the spot are over- or under-counted (#57).
+#   - The gyro measures turns directly. slam_toolbox adds no scans while
+#     the robot turns on the spot, so this is what carries the heading
+#     through a turn. Its bias is removed first by imu_bias.
+#   - The accelerometer is not used: integrating it for speed drifts, and
+#     the odometry already gives speed.
+
+ekf_filter_node:
+  ros__parameters:
+    frequency: 50.0
+    # Flat floors: estimate x, y, yaw only.
+    two_d_mode: true
+    publish_tf: true
+
+    # REP 105; slam_toolbox publishes map -> odom on top of this.
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    # Each *_config is [x, y, z, roll, pitch, yaw,
+    #                   vx, vy, vz, vroll, vpitch, vyaw,
+    #                   ax, ay, az].
+
+    # Track odometry: forward speed, and zero sideways speed (tracks can't
+    # move sideways). Not its turn rate (skid), nor its pose (that would be
+    # the odometry's integrated heading, skid errors and all).
+    odom0: /odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, false,
+                   false, false, false]
+
+    # Gyro: turn rate only. This config is in the IMU's own frame
+    # (front_camera_imu_optical_frame: z forward, y down), not base_link's,
+    # so all three gyro axes are enabled: the EKF rotates them into base_link
+    # with TF and, in 2D mode, keeps only the yaw rate. (Enabling only vyaw
+    # here would select the camera's forward axis, i.e. roll.) This also
+    # stays right if the camera is tilted.
+    imu0: /front_camera/imu/unbiased
+    imu0_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  true,  true,  true,
+                  false, false, false]
