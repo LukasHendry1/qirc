@@ -46,6 +46,7 @@ VALUE_COLS = {'min': 30, 'typ': 34, 'max': 38}
 #   ('item', text, min, typ, max)   a component and its range in W
 #   ('total', text, min, typ, max)  a subtotal, boxed
 #   ('cols',)                       Min / Typ / Max labels
+#   ('cols', a, b, c)               other labels for the three value columns
 #   ()                              blank
 SHEETS = [
     [
@@ -178,14 +179,14 @@ def _value(v):
     return f'{v:.2f}'
 
 
-def _overlay(sheet, number, total):
+def _overlay(sheet, number, total, header=HEADER):
     buf = BytesIO()
     c = canvas.Canvas(buf, pagesize=(612, PAGE_H))
     c.setFillColorRGB(*INK)
     c.setStrokeColorRGB(*INK)
 
     c.setFont('Helvetica', 9.5)
-    for x, y, text in HEADER.values():
+    for x, y, text in header.values():
         c.drawString(x, PAGE_H - y + 2.5, text)
     c.drawCentredString(SHEET_NUM_X, PAGE_H - SHEET_Y + 2, str(number))
     c.drawCentredString(OF_X, PAGE_H - SHEET_Y + 2, str(total))
@@ -205,7 +206,8 @@ def _overlay(sheet, number, total):
             c.drawString(_col_x(1) + 3, y, entry[1])
         elif kind == 'cols':
             c.setFont('Helvetica-Bold', 8.0)
-            for key, label in (('min', 'Min (W)'), ('typ', 'Typ (W)'), ('max', 'Max (W)')):
+            labels = entry[1:] or ('Min (W)', 'Typ (W)', 'Max (W)')
+            for key, label in zip(('min', 'typ', 'max'), labels):
                 c.drawRightString(_col_x(VALUE_COLS[key]) - 3, y, label)
         elif kind in ('item', 'total'):
             name, *values = entry[1:]
@@ -224,14 +226,19 @@ def _overlay(sheet, number, total):
     return PdfReader(buf).pages[0]
 
 
-def main():
+def write_sheets(sheets, output, header=HEADER):
+    """Write each sheet onto a copy of the template page; save to output."""
     writer = PdfWriter()
-    for number, sheet in enumerate(SHEETS, start=1):
+    for number, sheet in enumerate(sheets, start=1):
         page = writer.add_page(PdfReader(TEMPLATE).pages[0])
-        page.merge_page(_overlay(sheet, number, len(SHEETS)))
-    with open(OUTPUT, 'wb') as f:
+        page.merge_page(_overlay(sheet, number, len(sheets), header))
+    with open(output, 'wb') as f:
         writer.write(f)
-    print(f'wrote {OUTPUT}')
+    print(f'wrote {output}')
+
+
+def main():
+    write_sheets(SHEETS, OUTPUT)
 
 
 if __name__ == '__main__':
