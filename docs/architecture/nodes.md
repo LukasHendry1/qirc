@@ -79,8 +79,9 @@ The EKF (`qirc_localization/launch/ekf.launch.py`, config in `config/ekf.yaml`) 
 |---|---|---|---|---|---|
 | `vehicle_manager` | `qirc_planning` | stub | `/user_info`, `/estop`, `/battery` | `/robot_state`, `/lights` | Serves: schedule and mission services. Calls: `SearchForUser`, `NavigateToPose`, `DispensePills`, `MoveArm` |
 | `global_planner` | `qirc_planning` | stub | `/map`, `/user_info` | `/plan` | Serves: `SearchForUser` (#62), `NavigateToPose` |
-| `local_planner` | `qirc_planning` | stub | `/plan`, `/scan`, `/detections` | `/local_plan` | – |
-| `control` (MPC) | `qirc_control` | stub | `/local_plan`, `/odometry/filtered` | `/cmd_vel_nav` | – |
+| `local_planner` (MPC) | `qirc_planning` | stub | `/plan`, `/scan`, `/detections`, `/odometry/filtered`, TF `map → base_link` | `/cmd_vel_nav`, `/local_plan` (visualization) | – |
+
+**Local planning is one layer.** `local_planner` follows the global path, avoids obstacles and drives the robot, all in one MPC (#63). It is sampling-based, in the style of Nav2's MPPI controller: it rolls out many candidate command sequences through a skid-steer model of the tracks (#64), scores each on following `/plan`, clearance from `/scan` and `/detections` (with a larger margin around people), and smoothness, and sends the best first command on `/cmd_vel_nav`. This is the classic ROS meaning of a local planner (as in ROS 1's `move_base`; Nav2 calls it the controller), so there is no separate path-tracking controller, and the benchmark (#66) compares it directly with Nav2's controller. `/local_plan` is the predicted path of the chosen rollout, for RViz only.
 
 `vehicle_manager` is the state machine (#72): sleep → wake on schedule → search for user → approach → dispense → raise arm → return home, plus an error / E-stop state.
 

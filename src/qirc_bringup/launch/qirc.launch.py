@@ -42,7 +42,6 @@ NODES = [
     ('qirc_planning', 'vehicle_manager_node'),
     ('qirc_planning', 'global_planner_node'),
     ('qirc_planning', 'local_planner_node'),
-    ('qirc_control', 'control_node'),
     ('qirc_pill_dispenser', 'pill_box_node'),
     ('qirc_pill_dispenser', 'arm_node'),
 ]

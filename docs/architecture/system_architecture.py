@@ -142,9 +142,9 @@ box(1010, 380, 320, 195, ['Global Planner:', '- Search algorithm generates',
                           '  points around the home to check', '- Chooses the next point',
                           '- Plans a path to it (A*)', '- Serves SearchForUser and',
                           '  NavigateToPose'])
-box(1010, 630, 320, 160, ['Local Planner:', '- Follows the global path',
-                          '- Handles detours and avoids', '  obstacles using /scan',
-                          '  and /detections'])
+box(1010, 630, 320, 160, ['Local Planner (MPC):', '- Follows the global path and',
+                          '  avoids obstacles (/scan,', '  /detections) in one MPC',
+                          '- Skid-steer model of the tracks'])
 
 # Pill dispensing
 stack(1430, 100, 360, 320, 'Pill Dispensing (qirc_pill_dispenser)', 'dispensing')
@@ -153,9 +153,7 @@ box(1460, 290, 300, 110, ['Move Arm to User Height:', 'MoveArm action,',
                           'height from /user_info'])
 
 # Controls
-stack(1430, 440, 360, 360, 'Controls Stack (qirc_control)', 'controls')
-box(1460, 490, 300, 120, ['Controls (MPC):', 'tracks the local path with a',
-                          'skid-steer model of the tracks'])
+stack(1430, 610, 360, 190, 'Controls Stack (qirc_control)', 'controls')
 box(1460, 660, 300, 120, ['Command Mux (twist_mux):', 'picks nav / teleop / web',
                           'commands by priority;', 'E-stop blocks all driving'])
 
@@ -241,12 +239,10 @@ arrow([(1330, 195), (1460, 195)])
 label(1395, 182, 'DispensePills')
 arrow([(1330, 310), (1460, 310)])
 label(1395, 297, 'MoveArm')
-arrow([(1330, 700), (1395, 700), (1395, 550), (1460, 550)])
-label(1362, 688, '/local_plan', size=11.5, halo=COLORS['planning'])
+arrow([(1330, 720), (1460, 720)])
+label(1395, 707, '/cmd_vel_nav', size=11.5)
 
 # Controls
-arrow([(1610, 610), (1610, 660)])
-label(1620, 635, '/cmd_vel_nav', anchor='start', halo=COLORS['controls'])
 arrow([(1760, 720), (1835, 720)])
 label(1797, 707, '/cmd_vel', size=11.5)
 arrow([(885, 885), (885, 815), (1520, 815), (1520, 780)])

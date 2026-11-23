@@ -3,11 +3,10 @@
 <package format="3">
   <name>qirc_control</name>
   <version>0.0.0</version>
-  <description>Controls stack: trajectory tracking (MPC) for the drive motors</description>
+  <description>Controls stack: velocity command selection (twist_mux)</description>
   <maintainer email="lukas.hendry15@gmail.com">Lukas Hendry</maintainer>
   <license>MIT</license>
 
-  <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

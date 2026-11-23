@@ -81,7 +81,7 @@ def test_each_driver_can_be_turned_off(entities, flag, driver):
 def test_rest_of_stack_runs_on_both(entities, use_sim):
     started = _started(entities, use_sim=use_sim)
     assert {'front_detection_node', 'vehicle_manager_node', 'global_planner_node',
-            'local_planner_node', 'control_node', 'pill_box_node', 'arm_node'} <= started
+            'local_planner_node', 'pill_box_node', 'arm_node'} <= started
 
 
 def test_simulation_arguments_are_passed_on(entities):

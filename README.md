@@ -32,7 +32,7 @@ The QIRC runs on **ROS 2 (Humble)**. Functionality is split into packages, each 
 | `qirc_perception` | Detect objects, people, and stairwells from camera input |
 | `qirc_localization` | Build a map and estimate the robot's pose |
 | `qirc_planning` | Decide where the robot goes and how it gets there |
-| `qirc_control` | Turn planned paths into vehicle commands |
+| `qirc_control` | Choose which velocity command reaches the motors (`twist_mux`) |
 | `qirc_pill_dispenser` | Dispense pills and operate the delivery arm |
 | `qirc_bringup` | Launch files that start the whole robot |
 | `qirc_description` | Robot model (URDF) |
@@ -65,13 +65,13 @@ Decides where the vehicle goes and how it gets there.
 
 - **Vehicle Manager Node**: Top-level coordinator that sequences tasks and manages the state of the whole system.
 - **Global Planner Node**: Plans a route to the goal using A*.
-- **Local Planner Node**: Follows the global route while avoiding obstacles in real time.
+- **Local Planner Node**: Follows the global route while avoiding obstacles in real time, and drives the robot: a model predictive controller (MPC) with a skid-steer model of the tracks, publishing velocity commands.
 
 ### Control Package
 
-Controls the vehicle's motion.
+Chooses which velocity command reaches the motors.
 
-- **Control Node**: Tracks the planned path using a model predictive control (MPC) algorithm.
+- **Command mux (`twist_mux`)**: Picks between navigation, teleop and web commands by priority; the E-stop blocks all driving.
 
 ### Pill Dispenser Package
 

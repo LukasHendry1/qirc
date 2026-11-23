@@ -20,8 +20,8 @@ The message types used between QIRC nodes. See [nodes.md](nodes.md) for which no
 | `/map` | `nav_msgs/OccupancyGrid` | slam_toolbox → global_planner |
 | `/detections` | `vision_msgs/Detection3DArray` | front_detection, rear_detection → user_detection, local_planner |
 | `/plan` | `nav_msgs/Path` | global_planner → local_planner |
-| `/local_plan` | `nav_msgs/Path` | local_planner → control |
-| `/cmd_vel_nav` | `geometry_msgs/Twist` | control → twist_mux |
+| `/local_plan` | `nav_msgs/Path` | local_planner → RViz (the MPC's predicted path; visualization only) |
+| `/cmd_vel_nav` | `geometry_msgs/Twist` | local_planner → twist_mux |
 | `/cmd_vel_teleop` | `geometry_msgs/Twist` | teleop → twist_mux |
 | `/cmd_vel_web` | `geometry_msgs/Twist` | rosbridge_server (web app) → twist_mux |
 | `/cmd_vel` | `geometry_msgs/Twist` | twist_mux → qirc_pico_bridge |
@@ -32,7 +32,7 @@ The message types used between QIRC nodes. See [nodes.md](nodes.md) for which no
 
 Notes:
 - **Detections** use the standard `vision_msgs/Detection3DArray` (class label, confidence and 3D position for each detection) rather than a custom type. The OAK driver already publishes this format. Classes: `person`, `object`, `stairwell`.
-- **`/local_plan`** starts as `nav_msgs/Path`. If the MPC needs speeds and timing along the path, add a custom `Trajectory.msg` later.
+- **`/local_plan`** is only for seeing what the local planner's MPC intends to do; nothing subscribes to it. The MPC itself outputs velocities (`/cmd_vel_nav`).
 - **`/estop`** is a plain `Bool` so `twist_mux` can use it directly as a lock that blocks all drive commands.
 
 ## Custom messages (`qirc_interfaces/msg`)
