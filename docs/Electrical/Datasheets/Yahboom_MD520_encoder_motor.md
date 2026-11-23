@@ -20,7 +20,21 @@
 
 **Versions:** each variant is sold either as a separate motor or with a mounting bracket.
 
-> **TODO:** record which variant the arm uses: ______
+### Variant used on QIRC: MD520Z19_12V (labelled JGB37-520 12V 550RPM)
+
+JGB37-520 is the generic name for this motor type: a 520-size motor on a 37 mm gearbox. Other sellers' JGB37-520 motors have different windings and specs, so the values here apply to Yahboom's motor only.
+
+| Parameter | Value |
+|---|---|
+| Rated voltage | 12 V (11–16 V) |
+| Rated current | 0.3 A |
+| Stall current | 3 A |
+| Rated power | 3.6 W (≤ 4 W) |
+| Gear ratio | 1:19 |
+| Output speed | 550 ± 10 rpm (likely no-load) |
+| Rated torque | 2.2 kg·cm (0.216 N·m) |
+| Stall torque | 3.1 kg·cm (0.304 N·m) |
+| Encoder counts per output revolution | 836 (11 × 4 × 19) |
 
 ![Product parameters](images/md520_parameters.png)
 
