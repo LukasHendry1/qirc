@@ -1,6 +1,6 @@
 # QIRC power distribution (draft)
 #
-# Render: pip install wireviz && wireviz docs/wiring/power.yml
+# Render: pip install wireviz && wireviz docs/Electrical/wiring/power.yml
 # Assumes a 24 V system: 8S LiFePO4 battery, E-S Motor 36PG 24 V drive
 # motors, JGB37-520 24 V arm motors. Items marked TBD are still undecided.
 

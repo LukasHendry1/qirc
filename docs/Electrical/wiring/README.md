@@ -29,7 +29,7 @@ Wiring diagrams written as [WireViz](https://github.com/wireviz/WireViz) YAML. T
 
 ```bash
 pip install wireviz          # also needs Graphviz: sudo apt install graphviz
-wireviz docs/wiring/power.yml
+wireviz docs/Electrical/wiring/power.yml
 ```
 
 Commit the regenerated `.svg`, `.png` and `.bom.tsv` together with the `.yml`. Avoid `->`, `<` and `>` in labels; Graphviz rejects them.

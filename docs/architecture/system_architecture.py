@@ -310,7 +310,7 @@ notes = [
     '  dip the battery voltage do not reboot it.',
     '- All grounds meet at one common ground bus.',
     '- Black arrows: data and commands. Red arrows: power.',
-    '- Details: docs/architecture (nodes, topics) and docs/wiring (power).',
+    '- Details: docs/architecture (nodes, topics) and docs/Electrical (power).',
 ]
 for i, line in enumerate(notes):
     weight = ' font-weight="bold"' if i == 0 else ''

@@ -293,5 +293,5 @@
 <text x="2020" y="1309" font-size="16" dominant-baseline="central" style="white-space:pre">  dip the battery voltage do not reboot it.</text>
 <text x="2020" y="1340" font-size="16" dominant-baseline="central" style="white-space:pre">- All grounds meet at one common ground bus.</text>
 <text x="2020" y="1371" font-size="16" dominant-baseline="central" style="white-space:pre">- Black arrows: data and commands. Red arrows: power.</text>
-<text x="2020" y="1402" font-size="16" dominant-baseline="central" style="white-space:pre">- Details: docs/architecture (nodes, topics) and docs/wiring (power).</text>
+<text x="2020" y="1402" font-size="16" dominant-baseline="central" style="white-space:pre">- Details: docs/architecture (nodes, topics) and docs/Electrical (power).</text>
 </svg>

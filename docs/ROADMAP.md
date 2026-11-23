@@ -181,7 +181,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 - [ ] Power distribution: main fuse, main switch, E-stop (motor rail only), buck-boost to 19 V for the Jetson, 5 V buck for the LEDs
 - [ ] Encoder voltage check (the Pico's RP2040 is not 5 V tolerant), level shifting if needed
 - [ ] DRV8825 setup: current limit (~1.2–1.5 A), 100 µF capacitors, microstepping pins
-- [ ] Wiring diagrams in `docs/wiring/` (WireViz) and a system power block diagram
+- [ ] Wiring diagrams in `docs/Electrical/wiring/` (WireViz) and a system power block diagram
 
 ---
 
