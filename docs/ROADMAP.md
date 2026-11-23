@@ -15,7 +15,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 - [x] Rear camera (OAK-D Lite) driver integration
 - [x] Front camera (RealSense D435i, including its IMU) driver integration
 - [x] RPLidar A2M8 driver integration
-- [ ] Hardware decisions pending: motor controller (Raspberry Pi Pico, tentative), drive and arm motors, battery
+- [ ] Hardware decisions pending: battery. Decided: Raspberry Pi Pico (RP2040) motor controller, E-S Motor 36PG-555K-24120-100 drive motors, Yahboom MD520Z19 arm motors; datasheets in [docs/Electrical/Datasheets](Electrical/Datasheets/)
 
 ---
 
@@ -175,13 +175,15 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Hardware and electrical (supporting tasks)
 
-- [ ] Choose drive motors (with encoders; 12 V or 24 V, depending on the torque stair climbing needs)
-- [ ] Confirm arm motor voltage, arm motor driver ×2, and arm position feedback (encoders or potentiometers)
-- [ ] Choose the battery (recommended: 4S LiFePO4, 12.8 V, ~12–15 Ah; final choice depends on the drive motors)
-- [ ] Power distribution: main fuse, main switch, E-stop (motor rail only), buck-boost to 19 V for the Jetson, 5 V buck for the LEDs
+- [x] Drive motors: E-S Motor 36PG-555K-24120-100, 24 V, 120 rpm ([datasheet](Electrical/Datasheets/drive_motor_datasheet.pdf)), on Cytron MD10C drivers ([manual](Electrical/Datasheets/drive_motor_driver.pdf))
+- [ ] Drive motor encoders: the 36PG has none, and track odometry (`/odom`) needs them
+- [x] Arm motors: Yahboom MD520Z19 (12 V, Hall encoders) on a 12 V rail ([datasheet](Electrical/Datasheets/Yahboom_MD520_encoder_motor.md)), driven by a SparkFun TB6612FNG ([datasheet](Electrical/Datasheets/SparkFun_TB6612FNG_motor_driver.md))
+- [ ] Arm position feedback beyond the motor encoders (limit switches or potentiometers), if needed
+- [ ] Choose the battery: 8S LiFePO4 (25.6 V nominal), BMS rated 40 A continuous or more; capacity from the run time needed ([PWR-02](Electrical/calculations/battery_capacity.pdf): 10 Ah gives ~1.1 h of driving, ~2.3 h of mixed use)
+- [ ] Power distribution: main fuse, main switch, E-stop (motor rail only), buck-boost to 19 V for the Jetson, 12 V buck for the arm (after the E-stop), 5 V buck for the LEDs; choose the converters (their efficiency feeds [PWR-02](Electrical/calculations/battery_capacity.pdf))
 - [ ] Encoder voltage check (the Pico's RP2040 is not 5 V tolerant), level shifting if needed
 - [ ] DRV8825 setup: current limit (~1.2–1.5 A), 100 µF capacitors, microstepping pins
-- [ ] Wiring diagrams in `docs/wiring/` (WireViz) and a system power block diagram
+- [ ] Wiring diagrams in `docs/Electrical/wiring/` (WireViz) and a system power block diagram
 
 ---
 

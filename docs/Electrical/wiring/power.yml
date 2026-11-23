@@ -1,11 +1,13 @@
 # QIRC power distribution (draft)
 #
-# Render: pip install wireviz && wireviz docs/wiring/power.yml
+# Render: pip install wireviz && wireviz docs/Electrical/wiring/power.yml
 # Assumes a 24 V system: 8S LiFePO4 battery, E-S Motor 36PG 24 V drive
-# motors, JGB37-520 24 V arm motors. Items marked TBD are still undecided.
+# motors. The arm motors (Yahboom MD520Z19 / JGB37-520, 12 V) have their own
+# 12 V rail from a buck converter after the E-stop. Items marked TBD are
+# still undecided. Part datasheets are in docs/Electrical/Datasheets.
 
 metadata:
-  title: QIRC power distribution (draft, 24 V)
+  title: QIRC power distribution (draft, 24 V with a 12 V arm rail)
 
 options:
   bgcolor: WH
@@ -46,11 +48,11 @@ connectors:
   BUS_MOT:
     <<: *bus
     subtype: Motor rail 24 V (after E-stop)
-    pinlabels: [IN, DRIVE_L, DRIVE_R, ARM, STEP_1, STEP_2, LIGHTS]
+    pinlabels: [IN, DRIVE_L, DRIVE_R, TO_12V, STEP_1, STEP_2, LIGHTS]
   BUS_GND:
     <<: *bus
     subtype: Common ground
-    pinlabels: [BAT, DRIVE_L, DRIVE_R, ARM, STEP_1, STEP_2, LIGHTS, 19V, 5V]
+    pinlabels: [BAT, DRIVE_L, DRIVE_R, ARM_12V, STEP_1, STEP_2, LIGHTS, 19V, 5V]
 
   # --- Regulators and computer -------------------------------------------
   DC19:
@@ -62,6 +64,11 @@ connectors:
     type: DC-DC buck
     subtype: 20-30 V in, 5 V out, 3 A min
     pinlabels: [IN+, IN-, OUT+, OUT-]
+  DC12:
+    type: DC-DC buck (arm rail)
+    subtype: 20-30 V in, 12 V out, 6 A min
+    pinlabels: [IN+, IN-, OUT+, OUT-]
+    notes: After the E-stop, so the E-stop stops the arm; 6 A covers both arm motors starting or stalled at once (2 x 3 A)
   JETSON:
     type: Jetson Orin Nano dev kit
     pinlabels: [DC_IN+, DC_IN-, USB-A 1, USB-A 2, USB-A 3, USB-A 4]
@@ -96,31 +103,31 @@ connectors:
     notes: Motor stall (21 A) exceeds 13 A continuous; limit in firmware
   M_L:
     type: Drive motor left
-    subtype: E-S Motor 36PG 555K, 24 V, 120 RPM, 2.6 A rated, 21 A stall
+    subtype: E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall
     pinlabels: [M+, M-]
     notes: No encoder (encoder solution TBD)
   M_R:
     type: Drive motor right
-    subtype: E-S Motor 36PG 555K, 24 V, 120 RPM, 2.6 A rated, 21 A stall
+    subtype: E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall
     pinlabels: [M+, M-]
     notes: No encoder (encoder solution TBD)
 
   # --- Arm -----------------------------------------------------------------
   AD:
-    type: Cytron MDD10A (arm, dual channel)
-    subtype: 5-30 V, 10 A per channel
-    pinlabels: [B+, B-, M1A, M1B, M2A, M2B]
-    notes: Same PWM + DIR interface as the MD10C
+    type: SparkFun TB6612FNG dual motor driver (arm)
+    subtype: VM 4.5-13.5 V (15 V abs. max), 1.0 A per channel continuous, 3.2 A peak (10 ms)
+    pinlabels: [VM, GND, AO1, AO2, BO1, BO2]
+    notes: 12 V arm rail only; logic VCC 3.3 V from the Pico; firmware caps PWM duty and detects stalls
   AM_1:
     type: Arm motor 1
-    subtype: JGB37-520, 24 V, 10 W
+    subtype: Yahboom MD520Z19 (JGB37-520), 12 V, 550 RPM, 0.3 A rated, 3 A stall
     pinlabels: [M+, M-]
-    notes: Hall encoder (if fitted) wires to the Pico
+    notes: Hall encoder (3.3 V, 11 ppr) wires to the Pico
   AM_2:
     type: Arm motor 2
-    subtype: JGB37-520, 24 V, 10 W
+    subtype: Yahboom MD520Z19 (JGB37-520), 12 V, 550 RPM, 0.3 A rated, 3 A stall
     pinlabels: [M+, M-]
-    notes: Hall encoder (if fitted) wires to the Pico
+    notes: Hall encoder (3.3 V, 11 ppr) wires to the Pico
 
   # --- Dispenser -----------------------------------------------------------
   DRV_1:
@@ -133,9 +140,11 @@ connectors:
     notes: 100 uF 50 V cap across VMOT-GND; current limit 1.2-1.5 A
   ST_1:
     type: NEMA 17 stepper (dispenser 1)
+    subtype: StepperOnline 17HS19-2004S1, 2 A per phase
     pinlabels: [A+, A-, B+, B-]
   ST_2:
     type: NEMA 17 stepper (dispenser 2)
+    subtype: StepperOnline 17HS19-2004S1, 2 A per phase
     pinlabels: [A+, A-, B+, B-]
 
   # --- Lights --------------------------------------------------------------
@@ -144,10 +153,12 @@ connectors:
     pinlabels: [VIN+, VIN-, OUT+, OUT-]
     notes: PWM gate signal from Pico (signal diagram)
   HEAD:
-    type: Headlights (12-24 V LED)
+    type: Headlights
+    subtype: goBILDA 3118-0102-0002, 400 lm, 5-30 V, XT30
     pinlabels: [+, '-']
   LEDS:
-    type: WS2812B status LEDs
+    type: Status LEDs
+    subtype: Seeed Grove WS2813 strip, 30 LEDs, 5 V, 1.8 A max
     pinlabels: [5V, GND]
     notes: Data line from Pico (signal diagram)
 
@@ -180,6 +191,9 @@ cables:
   W_MD_R:
     <<: *red_black
     gauge: 14 AWG
+  W_DC12_IN:
+    <<: *red_black
+    gauge: 18 AWG
   W_AD:
     <<: *red_black
     gauge: 18 AWG
@@ -336,13 +350,16 @@ connections:
     - W_M_R: [1, 2]
     - M_R: [1, 2]
 
-  # Arm motors (one dual-channel driver)
+  # Arm motors: 12 V buck after the E-stop, then one dual-channel driver
   - - BUS_MOT: [4]
-    - W_AD: [1]
-    - AD: [1]
+    - W_DC12_IN: [1]
+    - DC12: [1]
   - - BUS_GND: [4]
-    - W_AD: [2]
-    - AD: [2]
+    - W_DC12_IN: [2]
+    - DC12: [2]
+  - - DC12: [3, 4]
+    - W_AD: [1, 2]
+    - AD: [1, 2]
   - - AD: [3, 4]
     - W_AM_1: [1, 2]
     - AM_1: [1, 2]
