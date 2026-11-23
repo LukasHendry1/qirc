@@ -12,7 +12,8 @@ Wiring diagrams written as [WireViz](https://github.com/wireviz/WireViz) YAML. T
 ## Design decisions
 
 - **E-stop cuts the motor rail only.** The Jetson, Pico and LEDs stay powered, so the robot can log the stop and show it on the status LEDs and web app.
-- **24 V system:** 8S LiFePO4 battery (25.6 V nominal, 10 Ah), 24 V drive and arm motors. The DRV8825s and headlights run from the same rail.
+- **24 V system:** 8S LiFePO4 battery (25.6 V nominal, 10 Ah) and 24 V drive motors. The DRV8825s and headlights run from the same rail.
+- **12 V arm rail:** the arm motors (Yahboom MD520Z19, 12 V) run from a 12 V buck converter. It's fed from the motor rail after the E-stop, so the E-stop also stops the arm. It's sized at 6 A or more, for both arm motors stalled (2 × 3 A).
 - **The Jetson has its own buck-boost converter** with a steady 19 V output, so motor current spikes that dip the battery voltage don't reboot it.
 - **40 A main fuse**, sized for both drive motors stalling at once (2 x 21 A) on a battery whose BMS allows 40 A or more.
 - **All grounds meet at one common ground bus.**

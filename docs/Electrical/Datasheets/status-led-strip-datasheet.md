@@ -38,7 +38,7 @@ The page doesn't list the pinout. This is the standard Grove digital pinout, so 
 - **Power budget** *(derived)*: at most 1.8 A / 9 W, with every LED on full white. Status colours at partial brightness draw much less. The 5 V buck in the wiring diagram (3 A minimum) covers it.
 - **Logic level:** the WS2813's data-high threshold is about 0.7 × VDD, which is 3.5 V at 5 V. The Pico's 3.3 V output is below that. It often works, but isn't guaranteed. A 74AHCT125 level shifter (or similar) on the data line makes it reliable.
 - **Resilience:** the WS2813 has a backup data input, so one dead LED doesn't stop the LEDs after it. The Grove cable carries only the main data line.
-- **Wiring diagram:** `power.yml` still names the status LEDs "WS2812B". The WS2813 uses the same timing and protocol, so the 5 V and data connections don't change.
+- **Wiring diagram:** `power.yml` lists this strip (Seeed Grove WS2813) on the 5 V buck, with the data line from the Pico.
 
 ## Source
 

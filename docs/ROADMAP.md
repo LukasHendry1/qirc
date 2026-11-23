@@ -15,7 +15,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 - [x] Rear camera (OAK-D Lite) driver integration
 - [x] Front camera (RealSense D435i, including its IMU) driver integration
 - [x] RPLidar A2M8 driver integration
-- [ ] Hardware decisions pending: motor controller (Raspberry Pi Pico, tentative), drive and arm motors, battery
+- [ ] Hardware decisions pending: battery. Decided: Raspberry Pi Pico (RP2040) motor controller, E-S Motor 36PG-555K-24120-100 drive motors, Yahboom MD520Z19 arm motors; datasheets in [docs/Electrical/Datasheets](Electrical/Datasheets/)
 
 ---
 
@@ -176,7 +176,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 ## Hardware and electrical (supporting tasks)
 
 - [ ] Choose drive motors (with encoders; 12 V or 24 V, depending on the torque stair climbing needs)
-- [ ] Confirm arm motor voltage, arm motor driver ×2, and arm position feedback (encoders or potentiometers)
+- [x] Arm motors: Yahboom MD520Z19 (12 V, Hall encoders) on a 12 V rail ([datasheet](Electrical/Datasheets/Yahboom_MD520_encoder_motor.md))
 - [ ] Choose the battery (recommended: 4S LiFePO4, 12.8 V, ~12–15 Ah; final choice depends on the drive motors)
 - [ ] Power distribution: main fuse, main switch, E-stop (motor rail only), buck-boost to 19 V for the Jetson, 5 V buck for the LEDs
 - [ ] Encoder voltage check (the Pico's RP2040 is not 5 V tolerant), level shifting if needed

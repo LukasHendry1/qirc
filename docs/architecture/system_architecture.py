@@ -184,7 +184,7 @@ box(1450, 1008, 320, 45, ['foxglove_bridge (dev tools)'])
 # --------------------------------------------------------------------------
 box(2150, 150, 250, 90, ['Stepper Control:', 'STEP/DIR to 2× DRV8825,', 'counts steps from power-on'])
 box(2150, 300, 250, 90, ['Arm Motor Control:', 'PWM/DIR to MDD10A,', 'position from encoders'])
-box(2150, 445, 250, 80, ['Lights:', 'WS2812B status patterns,', 'headlight PWM'])
+box(2150, 445, 250, 80, ['Lights:', 'WS2813 status patterns,', 'headlight PWM'])
 box(2150, 655, 250, 130, ['Drive Control:', 'per-track speed PID;', 'watchdog stops the motors',
                           'if commands stop arriving'])
 box(2150, 860, 250, 160, ['Sensing:', 'drive encoder counts (PIO)', 'E-stop state',
@@ -283,10 +283,10 @@ box(1000, 1260, 180, 70, ['E-stop', '(latching, NC)'])
 box(1000, 1365, 180, 70, ['Buck', '5 V out'])
 box(1240, 1155, 200, 70, ['Jetson Orin Nano'])
 box(1240, 1260, 200, 70, ['Motor Rail 24 V'])
-box(1240, 1365, 200, 70, ['Status LEDs', '(WS2812B)'])
+box(1240, 1365, 200, 70, ['Status LEDs', '(WS2813)'])
 box(1500, 1155, 420, 70, ['USB 5 V from the Jetson:', 'cameras, LiDAR, Pico'])
-box(1500, 1260, 420, 70, ['Motor drivers: 2× MD10C (drive), MDD10A (arm),',
-                          '2× DRV8825 (steppers), headlight MOSFET'])
+box(1500, 1260, 420, 70, ['2× MD10C (drive), 2× DRV8825 (steppers),',
+                          'headlight MOSFET; 12 V buck → MDD10A (arm)'])
 
 arrow([(260, 1295), (320, 1295)], color=POWER)
 arrow([(470, 1295), (530, 1295)], color=POWER)
