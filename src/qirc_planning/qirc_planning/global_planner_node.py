@@ -18,7 +18,7 @@ class GlobalPlannerNode(Node):
         - Detections
 
     Outputs:
-        - Global trajectory -> local planner
+        - Global path (/plan) -> local planner
     """
 
     def __init__(self):

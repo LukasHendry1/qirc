@@ -14,12 +14,11 @@ setup(
     zip_safe=True,
     maintainer='Lukas Hendry',
     maintainer_email='lukas.hendry15@gmail.com',
-    description='Controls stack: trajectory tracking (MPC) for the drive motors',
+    description='Controls stack: velocity command selection (twist_mux)',
     license='MIT',
     tests_require=['pytest'],
+    # No nodes of its own yet: twist_mux's configuration comes with #16.
     entry_points={
-        'console_scripts': [
-            'control_node = qirc_control.control_node:main',
-        ],
+        'console_scripts': [],
     },
 )

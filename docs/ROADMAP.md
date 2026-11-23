@@ -96,12 +96,11 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ---
 
-## Phase 5: Navigation (global planner, local planner, control)
+## Phase 5: Navigation (global planner, local planner)
 
 - [ ] `now` **Nav2 baseline in simulation**: autonomous point-to-point navigation with stock planner/controller
 - [ ] `now` **Custom global planner**: search algorithm that generates candidate points around the home to look for the user, picks the next one, and plans a path
-- [ ] `now` **Custom local planner**: detours and obstacle avoidance during traversal
-- [ ] `now` **MPC controller** (`control_node`), using a skid-steer model of the tracks
+- [ ] `now` **Custom local planner (MPC)**: follows the global path and avoids obstacles in one layer, using a skid-steer model of the tracks (#63, #64)
 - [ ] `now` Compare the custom components against the Nav2 baseline (useful results for the report)
 - [ ] `robot` Tune on the real robot: speed limits, obstacle inflation, MPC weights
 

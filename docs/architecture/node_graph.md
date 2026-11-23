@@ -44,8 +44,7 @@ flowchart LR
     subgraph PLAN["Planning and control"]
         VM["vehicle_manager"]
         GP["global_planner"]
-        LP["local_planner"]
-        CTRL["control (MPC)"]
+        LP["local_planner<br/>(MPC)"]
     end
 
     subgraph DISP["Pill dispensing"]
@@ -71,7 +70,7 @@ flowchart LR
 
     %% Odometry and TF
     PB -->|"/odom"| EKF
-    EKF -->|"/odometry/filtered"| CTRL
+    EKF -->|"/odometry/filtered"| LP
     RSP -.->|"base_link to sensor frames"| TF
     EKF -.->|"odom to base_link"| TF
     SLAM -.->|"map to odom"| TF
@@ -89,8 +88,7 @@ flowchart LR
     SLAM -->|"/map"| GP
     VM ==>|"SearchForUser<br/>NavigateToPose"| GP
     GP -->|"/plan"| LP
-    LP -->|"/local_plan"| CTRL
-    CTRL -->|"/cmd_vel_nav"| MUX
+    LP -->|"/cmd_vel_nav"| MUX
     TELEOP -->|"/cmd_vel_teleop"| MUX
     RB -->|"/cmd_vel_web"| MUX
     MUX -->|"/cmd_vel"| PB

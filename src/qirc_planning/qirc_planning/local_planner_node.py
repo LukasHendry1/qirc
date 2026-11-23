@@ -1,4 +1,4 @@
-"""Local planner: handles detours and obstacle avoidance during traversal."""
+"""Local planner: follows the global path and avoids obstacles, as one MPC."""
 
 import rclpy
 from rclpy.node import Node
@@ -6,17 +6,22 @@ from rclpy.node import Node
 
 class LocalPlannerNode(Node):
     """
-    Adjust the trajectory locally during traversal.
+    Follow the global path while avoiding obstacles, and drive the robot.
 
-    Handles small trajectory changes and detours (obstacle avoidance).
+    A sampling-based MPC (like Nav2's MPPI controller): rolls out candidate
+    command sequences through a skid-steer model of the tracks (#64), scores
+    them on path following, clearance and smoothness, and sends the best
+    first command (#63). It is the only layer between the global planner and
+    the motors; there is no separate path-tracking controller.
 
     Inputs:
-        - Global trajectory
-        - Robot pose
-        - Detections
+        - Global path: /plan
+        - Obstacles: /scan, /detections (larger margin around people)
+        - Robot velocity: /odometry/filtered; pose: TF map -> base_link
 
     Outputs:
-        - Local trajectory / reference -> controls
+        - Velocity command: /cmd_vel_nav -> twist_mux
+        - Predicted path of the chosen rollout: /local_plan (RViz only)
     """
 
     def __init__(self):
