@@ -10,3 +10,6 @@
     nn:
       # Stock MobileNet-SSD (VOC classes, includes "person").
       i_nn_config_path: depthai_ros_driver/mobilenet
+      # Also publish the image the detector ran on (nn/passthrough): the
+      # boxes are in its pixels. rear_detection draws on it for debugging.
+      i_enable_passthrough: true

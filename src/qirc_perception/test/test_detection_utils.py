@@ -111,3 +111,74 @@ def test_make_detection():
     assert result.hypothesis.class_id == PERSON
     assert result.hypothesis.score == pytest.approx(0.9)
     assert result.pose.pose.position.z == pytest.approx(3.0)
+
+
+# ----- Rear camera boxes and debug images --------------------------------------
+
+def _oak_detection(center_px, size_px, position):
+    """Build an OAK detection as the driver sends it: pixel bbox, 3D position in the pose."""
+    from vision_msgs.msg import Detection3D, ObjectHypothesisWithPose
+    detection = Detection3D()
+    detection.bbox.center.position.x, detection.bbox.center.position.y = center_px
+    detection.bbox.size.x, detection.bbox.size.y = size_px
+    detection.bbox.size.z = 0.01
+    result = ObjectHypothesisWithPose()
+    result.hypothesis.class_id = PERSON
+    result.hypothesis.score = 0.9
+    result.pose.pose.position.x, result.pose.pose.position.y, result.pose.pose.position.z = (
+        position)
+    detection.results.append(result)
+    return detection
+
+
+def test_pixel_box():
+    from qirc_perception.detection_utils import pixel_box
+    detection = _oak_detection((161.0, 177.0), (278.0, 246.0), (-0.44, 0.17, 0.92))
+    assert pixel_box(detection) == pytest.approx((22.0, 54.0, 300.0, 300.0))
+
+
+def test_bbox_to_metres_uses_the_3d_position_and_camera_matrix():
+    from qirc_perception.detection_utils import bbox_to_metres
+    # 300 x 300 passthrough image with fx = fy = 200 px.
+    k = [200.0, 0.0, 150.0, 0.0, 200.0, 150.0, 0.0, 0.0, 1.0]
+    detection = _oak_detection((150.0, 150.0), (100.0, 50.0), (0.1, -0.2, 2.0))
+    bbox_to_metres(detection, k)
+    center = detection.bbox.center.position
+    assert (center.x, center.y, center.z) == pytest.approx((0.1, -0.2, 2.0))
+    assert detection.bbox.center.orientation.w == 1.0
+    # 100 px wide at 2 m with fx = 200 px is 1 m; 50 px high is 0.5 m.
+    assert detection.bbox.size.x == pytest.approx(1.0)
+    assert detection.bbox.size.y == pytest.approx(0.5)
+    assert detection.bbox.size.z == 0.0
+
+
+def test_bbox_to_metres_without_camera_matrix_has_no_size():
+    from qirc_perception.detection_utils import bbox_to_metres
+    detection = _oak_detection((161.0, 177.0), (278.0, 246.0), (-0.44, 0.17, 0.92))
+    bbox_to_metres(detection, None)
+    assert detection.bbox.center.position.z == pytest.approx(0.92)
+    assert (detection.bbox.size.x, detection.bbox.size.y, detection.bbox.size.z) == (0, 0, 0)
+
+
+def test_numpy_to_image_round_trip():
+    from qirc_perception.detection_utils import numpy_to_image
+    bgr = np.random.default_rng(0).integers(0, 255, (4, 5, 3), dtype=np.uint8)
+    msg = numpy_to_image(bgr, Header(frame_id='cam'))
+    assert (msg.encoding, msg.width, msg.height, msg.step) == ('bgr8', 5, 4, 15)
+    assert msg.header.frame_id == 'cam'
+    assert np.array_equal(image_to_numpy(msg), bgr)
+
+
+def test_draw_detections_draws_on_a_copy():
+    from qirc_perception.detection_utils import draw_detections
+    image = np.zeros((240, 320, 3), np.uint8)
+    out = draw_detections(image, [
+        (20, 30, 120, 200, PERSON, 0.9, 1.5),
+        (150, 40, 300, 100, OBJECT, 0.6, None),
+    ])
+    assert out.shape == image.shape
+    assert not image.any()                      # input unchanged
+    assert out[100, 20].any()                   # left edge of the first box
+    assert out[70, 150].any()                   # left edge of the second box
+    assert not out[150, 70].any()               # inside the first box: untouched
+    assert np.array_equal(draw_detections(image, []), image)
