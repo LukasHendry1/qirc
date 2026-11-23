@@ -68,7 +68,7 @@ connectors:
     type: DC-DC buck (arm rail)
     subtype: 20-30 V in, 12 V out, 6 A min
     pinlabels: [IN+, IN-, OUT+, OUT-]
-    notes: After the E-stop, so the E-stop stops the arm; 6 A covers both arm motors stalled (2 x 3 A)
+    notes: After the E-stop, so the E-stop stops the arm; 6 A covers both arm motors starting or stalled at once (2 x 3 A)
   JETSON:
     type: Jetson Orin Nano dev kit
     pinlabels: [DC_IN+, DC_IN-, USB-A 1, USB-A 2, USB-A 3, USB-A 4]
@@ -114,10 +114,10 @@ connectors:
 
   # --- Arm -----------------------------------------------------------------
   AD:
-    type: Cytron MDD10A (arm, dual channel)
-    subtype: 5-30 V, 10 A per channel
-    pinlabels: [B+, B-, M1A, M1B, M2A, M2B]
-    notes: Powered from the 12 V arm rail; same PWM + DIR interface as the MD10C
+    type: SparkFun TB6612FNG dual motor driver (arm)
+    subtype: VM 4.5-13.5 V (15 V abs. max), 1.0 A per channel continuous, 3.2 A peak (10 ms)
+    pinlabels: [VM, GND, AO1, AO2, BO1, BO2]
+    notes: 12 V arm rail only; logic VCC 3.3 V from the Pico; firmware caps PWM duty and detects stalls
   AM_1:
     type: Arm motor 1
     subtype: Yahboom MD520Z19 (JGB37-520), 12 V, 550 RPM, 0.3 A rated, 3 A stall

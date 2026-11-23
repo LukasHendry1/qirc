@@ -146,7 +146,7 @@
 <text x="2275.0" y="214.5" font-size="15" text-anchor="middle" dominant-baseline="central">counts steps from power-on</text>
 <rect x="2150" y="300" width="250" height="90" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
 <text x="2275.0" y="325.5" font-size="15" text-anchor="middle" dominant-baseline="central">Arm Motor Control:</text>
-<text x="2275.0" y="345.0" font-size="15" text-anchor="middle" dominant-baseline="central">PWM/DIR to MDD10A,</text>
+<text x="2275.0" y="345.0" font-size="15" text-anchor="middle" dominant-baseline="central">PWM/IN to TB6612FNG,</text>
 <text x="2275.0" y="364.5" font-size="15" text-anchor="middle" dominant-baseline="central">position from encoders</text>
 <rect x="2150" y="445" width="250" height="80" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
 <text x="2275.0" y="465.5" font-size="15" text-anchor="middle" dominant-baseline="central">Lights:</text>
@@ -272,7 +272,7 @@
 <text x="1710.0" y="1199.8" font-size="15" text-anchor="middle" dominant-baseline="central">cameras, LiDAR, Pico</text>
 <rect x="1500" y="1260" width="420" height="70" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
 <text x="1710.0" y="1285.2" font-size="15" text-anchor="middle" dominant-baseline="central">2× MD10C (drive), 2× DRV8825 (steppers),</text>
-<text x="1710.0" y="1304.8" font-size="15" text-anchor="middle" dominant-baseline="central">headlight MOSFET; 12 V buck → MDD10A (arm)</text>
+<text x="1710.0" y="1304.8" font-size="15" text-anchor="middle" dominant-baseline="central">headlight MOSFET; 12 V buck → TB6612FNG (arm)</text>
 <path d="M 260,1295 L 320,1295" fill="none" stroke="#C00000" stroke-width="1.4" marker-end="url(#power-end)"/>
 <path d="M 470,1295 L 530,1295" fill="none" stroke="#C00000" stroke-width="1.4" marker-end="url(#power-end)"/>
 <path d="M 680,1295 L 740,1295" fill="none" stroke="#C00000" stroke-width="1.4" marker-end="url(#power-end)"/>

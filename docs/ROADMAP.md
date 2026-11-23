@@ -176,7 +176,8 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 ## Hardware and electrical (supporting tasks)
 
 - [ ] Choose drive motors (with encoders; 12 V or 24 V, depending on the torque stair climbing needs)
-- [x] Arm motors: Yahboom MD520Z19 (12 V, Hall encoders) on a 12 V rail ([datasheet](Electrical/Datasheets/Yahboom_MD520_encoder_motor.md))
+- [x] Arm motors: Yahboom MD520Z19 (12 V, Hall encoders) on a 12 V rail ([datasheet](Electrical/Datasheets/Yahboom_MD520_encoder_motor.md)), driven by a SparkFun TB6612FNG ([datasheet](Electrical/Datasheets/SparkFun_TB6612FNG_motor_driver.md))
+- [ ] Arm position feedback beyond the motor encoders (limit switches or potentiometers), if needed
 - [ ] Choose the battery (recommended: 4S LiFePO4, 12.8 V, ~12–15 Ah; final choice depends on the drive motors)
 - [ ] Power distribution: main fuse, main switch, E-stop (motor rail only), buck-boost to 19 V for the Jetson, 5 V buck for the LEDs
 - [ ] Encoder voltage check (the Pico's RP2040 is not 5 V tolerant), level shifting if needed
