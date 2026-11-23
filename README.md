@@ -144,6 +144,8 @@ See [`src/qirc_gazebo`](src/qirc_gazebo/README.md) for the worlds, topics and op
 - [System architecture](docs/architecture/system_architecture.png): sensors, ROS 2 software, Pico firmware, actuators and power in one diagram
 - [Architecture](docs/architecture/): ROS 2 node graph, node list, and message definitions
 - [Wiring](docs/Electrical/wiring/): power distribution diagram
+- [Datasheets](docs/Electrical/Datasheets/): datasheets for the motors, drivers, sensors, lights and controllers
+- [Power calculations](docs/Electrical/calculations/): power draw of each component ([PWR-01](docs/Electrical/calculations/power_draw.pdf)) and battery capacity for each run time ([PWR-02](docs/Electrical/calculations/battery_capacity.pdf))
 
 ## License
 
