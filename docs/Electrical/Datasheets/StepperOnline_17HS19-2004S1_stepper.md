@@ -48,7 +48,7 @@ Black and green form coil A; red and blue form coil B. To reverse the direction,
 
 ## Notes for QIRC *(derived)*
 
-- **Holding power at 2 A:** 2² × 1.6 Ω = 6.4 W per phase. With both phases energised, that's ~12.8 W per motor, or ~26 W for the two dispenser steppers. This is why the DRV8825s should be disabled when the dispenser is idle.
+- **Winding power:** with a chopper driver like the DRV8825, the two phase currents follow I·cos θ and I·sin θ, so the total is P = I_limit² × R at every step. At the 2 A rating that's 2² × 1.6 Ω = 6.4 W per motor; at the 1.3 A setting it's 2.7 W. It's drawn even while holding still, which is why the DRV8825s should sleep when the dispenser is idle. The full calculation is in [power_draw.pdf](../calculations/power_draw.pdf).
 - **DRV8825 current limit:** the roadmap uses 1.2–1.5 A per phase. Set it with V_ref = I_limit / 2 (e.g. 0.65 V for 1.3 A). Lower current means less heat and less holding torque. Torque scales roughly with current, so about 0.38 N·m at 1.3 A.
 - **Supply current:** a chopper drive takes less from the supply than the phase current, about the winding loss plus the mechanical power divided by the supply voltage. At 24 V and 1.3 A per phase, expect roughly 0.3–0.5 A per motor while moving. Measure it to confirm.
 - **Steps:** with 1/16 microstepping, 200 × 16 = 3200 steps per output revolution.
