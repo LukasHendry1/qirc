@@ -1,15 +1,21 @@
 """
 Helpers shared by the detection nodes.
 
-Pure functions (numpy and ROS messages only, no ML libraries), so they can be
-unit-tested without a camera or a model.
+Pure functions (numpy, OpenCV and ROS messages only, no ML libraries), so
+they can be unit-tested without a camera or a model.
+
+Every detection on /detections has its bounding box in metres, in the camera's
+optical frame: centred on the 3D position, x and y size the box's width and
+height at that distance, z size 0 (unknown).
 """
 
 import json
 import math
 
+import cv2
 from geometry_msgs.msg import Point
 import numpy as np
+from sensor_msgs.msg import Image
 from vision_msgs.msg import Detection3D, ObjectHypothesisWithPose
 
 # Class labels on /detections (docs/architecture/messages.md).
@@ -51,6 +57,18 @@ def image_to_numpy(msg):
         if msg.encoding == 'rgb8':
             image = image[:, :, ::-1]
     return np.ascontiguousarray(image.astype(dtype.newbyteorder('=')))
+
+
+def numpy_to_image(image, header):
+    """Convert an H x W x 3 uint8 BGR array to a bgr8 sensor_msgs/Image."""
+    msg = Image()
+    msg.header = header
+    msg.height, msg.width = image.shape[:2]
+    msg.encoding = 'bgr8'
+    msg.is_bigendian = False
+    msg.step = msg.width * 3
+    msg.data = np.ascontiguousarray(image, dtype=np.uint8).tobytes()
+    return msg
 
 
 def depth_to_metres(depth, encoding):
@@ -174,3 +192,74 @@ def relabel_detection(detection, label_names, min_confidence):
     best.hypothesis.class_id = to_qirc_label(class_name)
     detection.results = [best]
     return detection
+
+
+def pixel_box(detection):
+    """Return an OAK detection's bounding box as (x1, y1, x2, y2) pixels."""
+    center, size = detection.bbox.center.position, detection.bbox.size
+    return (center.x - size.x / 2, center.y - size.y / 2,
+            center.x + size.x / 2, center.y + size.y / 2)
+
+
+def bbox_to_metres(detection, k=None):
+    """
+    Convert an OAK detection's bounding box from pixels to metres, in place.
+
+    The depthai driver gives the 3D position in the result's pose, but the
+    bounding box in pixels of the image the network ran on. This centres the
+    box on the 3D position and scales its width and height to metres at that
+    distance, using that image's camera matrix k (CameraInfo.k), like
+    make_detection does for the front camera. Without k the size is unknown
+    and set to 0. Returns the detection.
+    """
+    position = detection.results[0].pose.pose.position
+    width_px, height_px = detection.bbox.size.x, detection.bbox.size.y
+
+    detection.bbox.center.position = Point(x=position.x, y=position.y, z=position.z)
+    detection.bbox.center.orientation.x = 0.0
+    detection.bbox.center.orientation.y = 0.0
+    detection.bbox.center.orientation.z = 0.0
+    detection.bbox.center.orientation.w = 1.0
+    if k is None or k[0] <= 0 or k[4] <= 0:
+        detection.bbox.size.x = detection.bbox.size.y = 0.0
+    else:
+        detection.bbox.size.x = width_px * position.z / k[0]
+        detection.bbox.size.y = height_px * position.z / k[4]
+    detection.bbox.size.z = 0.0
+    return detection
+
+
+# Debug image colours (BGR).
+_PERSON_COLOUR = (60, 200, 60)
+_OBJECT_COLOUR = (255, 170, 40)
+_NO_DEPTH_COLOUR = (150, 150, 150)
+
+
+def draw_detections(image, boxes):
+    """
+    Return a copy of a BGR image with detection boxes and labels drawn on it.
+
+    boxes is an iterable of (x1, y1, x2, y2, label, score, distance): pixels,
+    the /detections label, the score (0-1) and the distance in metres, or None
+    if the detection was dropped for lack of depth (drawn in grey).
+    """
+    out = np.ascontiguousarray(image).copy()
+    height, width = out.shape[:2]
+    thickness = max(1, round(min(height, width) / 240))
+    scale = max(0.35, min(height, width) / 900)
+    for x1, y1, x2, y2, label, score, distance in boxes:
+        if distance is None:
+            colour, text = _NO_DEPTH_COLOUR, f'{label} {score:.2f} no depth'
+        else:
+            colour = _PERSON_COLOUR if label == PERSON else _OBJECT_COLOUR
+            text = f'{label} {score:.2f} {distance:.2f} m'
+        top_left = (int(round(x1)), int(round(y1)))
+        cv2.rectangle(out, top_left, (int(round(x2)), int(round(y2))), colour, thickness)
+
+        (text_w, text_h), baseline = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)
+        label_bottom = max(top_left[1], text_h + baseline + 2)
+        cv2.rectangle(out, (top_left[0], label_bottom - text_h - baseline - 2),
+                      (top_left[0] + text_w + 4, label_bottom), colour, -1)
+        cv2.putText(out, text, (top_left[0] + 2, label_bottom - baseline - 1),
+                    cv2.FONT_HERSHEY_SIMPLEX, scale, (0, 0, 0), 1, cv2.LINE_AA)
+    return out

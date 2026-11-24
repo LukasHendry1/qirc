@@ -12,6 +12,10 @@ Subscribes:
 Publishes:
     /detections   vision_msgs/Detection3DArray, in the colour camera's optical
                   frame. Labels: 'person' or 'object'.
+    /front_detection/image   sensor_msgs/Image (bgr8), for debugging: the colour
+                  image with every YOLO box, its label, score and distance
+                  (grey: dropped for lack of depth or beyond max_depth). Only
+                  drawn while something subscribes to it.
 
 Parameters (config/front_detection.yaml):
     model                 YOLO weights; a model name (e.g. yolo11n.pt) is
@@ -34,7 +38,8 @@ from sensor_msgs.msg import CameraInfo, Image
 from vision_msgs.msg import Detection3DArray
 
 from qirc_perception.detection_utils import (
-    box_depth, depth_to_metres, image_to_numpy, make_detection, to_qirc_label)
+    box_depth, depth_to_metres, draw_detections, image_to_numpy, make_detection,
+    numpy_to_image, to_qirc_label)
 
 
 class FrontDetectionNode(Node):
@@ -52,6 +57,7 @@ class FrontDetectionNode(Node):
         self.camera_matrix = None
 
         self.detection_pub = self.create_publisher(Detection3DArray, 'detections', 10)
+        self.image_pub = self.create_publisher(Image, '~/image', qos_profile_sensor_data)
         self.create_subscription(
             CameraInfo, 'front_camera/color/camera_info', self._camera_info_callback,
             qos_profile_sensor_data)
@@ -110,17 +116,23 @@ class FrontDetectionNode(Node):
         max_depth = self.get_parameter('max_depth').value
         detections = Detection3DArray()
         detections.header = color_msg.header
+        drawn = []
         for box, score, class_index in zip(
                 result.boxes.xyxy.tolist(), result.boxes.conf.tolist(),
                 result.boxes.cls.tolist()):
+            label = to_qirc_label(result.names[int(class_index)])
             depth = box_depth(depth_m, box)
             if depth is None or depth > max_depth:
+                drawn.append((*box, label, score, None))
                 continue
-            label = to_qirc_label(result.names[int(class_index)])
+            drawn.append((*box, label, score, depth))
             detections.detections.append(make_detection(
                 color_msg.header, label, score, box, depth, self.camera_matrix))
 
         self.detection_pub.publish(detections)
+        if self.image_pub.get_subscription_count() > 0:
+            self.image_pub.publish(
+                numpy_to_image(draw_detections(color, drawn), color_msg.header))
 
 
 def main(args=None):

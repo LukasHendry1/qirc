@@ -34,11 +34,32 @@ ros2 topic echo /detections
 ros2 launch qirc_bringup qirc.launch.py use_front_detection:=false
 ```
 
-To view the detections, add a `Detection3DArray` display for `/detections` in Foxglove.
+## Viewing the detections
+
+Each detection node publishes a debug image: the camera image with every box, its label, score and distance drawn on it.
+
+| Topic | Image |
+|---|---|
+| `/front_detection/image` | Front colour image with the YOLO boxes. Grey boxes were dropped: no depth, or beyond `max_depth`. |
+| `/rear_detection/image` | The 300 × 300 image the OAK's network ran on, with its boxes |
+
+They're only drawn while something subscribes, so they cost nothing otherwise. View them with any image viewer:
+
+```bash
+ros2 run rqt_image_view rqt_image_view /front_detection/image
+```
+
+You can also use an Image display in RViz, or an Image panel in Foxglove.
 
 ## Rear camera detections
 
 The OAK-D Lite runs MobileNet-SSD on the camera itself, and the depthai driver publishes `/rear_camera/nn/spatial_detections` with 3D positions already in place. The driver labels each detection with a class number (VOC classes, where 15 is person). `rear_detection` turns these into `person` / `object`, using the class names from the same model config the driver loads (`nn_config`, which must match `i_nn_config_path` in `rear_camera.yaml`). It drops results below `min_confidence`, and leaves positions unchanged. It needs no extra installs.
+
+The driver gives each bounding box in **pixels** of the image the network ran on (its "passthrough" image, 300 × 300). `rear_detection` converts it to metres, the same as the front camera's:
+- the box is centred on the 3D position
+- its width and height are scaled with the passthrough image's camera matrix
+
+That's why `rear_camera.yaml` sets `i_enable_passthrough: true`. Until the passthrough `camera_info` arrives, the box size is 0.
 
 ## How the 3D position is found (front camera)
 
