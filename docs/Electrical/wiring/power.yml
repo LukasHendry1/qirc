@@ -29,8 +29,18 @@ connectors:
     notes: XT60 or XT90; BMS rated 40 A continuous or more
   F1:
     type: Main fuse + holder
-    subtype: 40 A (ATO/MIDI)
+    subtype: 40 A, 32 V DC or more, breaking capacity 1000 A or more (MIDI/AMI)
     pinlabels: [IN, OUT]
+  F_MD_L:
+    type: Drive fuse left + holder
+    subtype: 15 A slow-blow, 32 V DC (ATO blade)
+    pinlabels: [IN, OUT]
+    notes: Protects MD10C left; passes starts and short peaks, blows on a held stall (21 A)
+  F_MD_R:
+    type: Drive fuse right + holder
+    subtype: 15 A slow-blow, 32 V DC (ATO blade)
+    pinlabels: [IN, OUT]
+    notes: Protects MD10C right; passes starts and short peaks, blows on a held stall (21 A)
   SW1:
     type: Main power switch
     subtype: Rated 40 A DC or more
@@ -184,7 +194,15 @@ cables:
     colors: [RD]
     gauge: 12 AWG
 
-  # Feeds from the buses
+  # Feeds from the buses (only the drive feeds have their own fuses)
+  W_F_MD_L:
+    wirecount: 1
+    colors: [RD]
+    gauge: 14 AWG
+  W_F_MD_R:
+    wirecount: 1
+    colors: [RD]
+    gauge: 14 AWG
   W_MD_L:
     <<: *red_black
     gauge: 14 AWG
@@ -332,6 +350,9 @@ connections:
 
   # Drive motors
   - - BUS_MOT: [2]
+    - W_F_MD_L: [1]
+    - F_MD_L: [1]
+  - - F_MD_L: [2]
     - W_MD_L: [1]
     - MD_L: [1]
   - - BUS_GND: [2]
@@ -341,6 +362,9 @@ connections:
     - W_M_L: [1, 2]
     - M_L: [1, 2]
   - - BUS_MOT: [3]
+    - W_F_MD_R: [1]
+    - F_MD_R: [1]
+  - - F_MD_R: [2]
     - W_MD_R: [1]
     - MD_R: [1]
   - - BUS_GND: [3]
