@@ -285,7 +285,7 @@ box(1240, 1155, 200, 70, ['Jetson Orin Nano'])
 box(1240, 1260, 200, 70, ['Motor Rail 24 V'])
 box(1240, 1365, 200, 70, ['Status LEDs', '(WS2813)'])
 box(1500, 1155, 420, 70, ['USB 5 V from the Jetson:', 'cameras, LiDAR, Pico'])
-box(1500, 1260, 420, 70, ['2× MD10C (drive), 2× DRV8825 (steppers),',
+box(1500, 1260, 420, 70, ['2× MD10C (drive, 15 A fuse each), 2× DRV8825,',
                           'headlight MOSFET; 12 V buck → TB6612FNG (arm)'])
 
 arrow([(260, 1295), (320, 1295)], color=POWER)

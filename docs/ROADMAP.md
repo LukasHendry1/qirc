@@ -180,7 +180,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 - [x] Arm motors: Yahboom MD520Z19 (12 V, Hall encoders) on a 12 V rail ([datasheet](Electrical/Datasheets/Yahboom_MD520_encoder_motor.md)), driven by a SparkFun TB6612FNG ([datasheet](Electrical/Datasheets/SparkFun_TB6612FNG_motor_driver.md))
 - [ ] Arm position feedback beyond the motor encoders (limit switches or potentiometers), if needed
 - [ ] Choose the battery: 8S LiFePO4 (25.6 V nominal), BMS rated 40 A continuous or more; capacity from the run time needed ([PWR-02](Electrical/calculations/battery_capacity.pdf): 10 Ah gives ~1.1 h of driving, ~2.3 h of mixed use)
-- [ ] Power distribution: main fuse, main switch, E-stop (motor rail only), buck-boost to 19 V for the Jetson, 12 V buck for the arm (after the E-stop), 5 V buck for the LEDs; choose the converters (their efficiency feeds [PWR-02](Electrical/calculations/battery_capacity.pdf))
+- [ ] Power distribution: main fuse (40 A) and a 15 A fuse per drive driver (no other branch fuses), main switch, E-stop (motor rail only), buck-boost to 19 V for the Jetson, 12 V buck for the arm (after the E-stop), 5 V buck for the LEDs; choose the converters (their efficiency feeds [PWR-02](Electrical/calculations/battery_capacity.pdf))
 - [ ] Encoder voltage check (the Pico's RP2040 is not 5 V tolerant), level shifting if needed
 - [ ] DRV8825 setup: current limit (~1.2–1.5 A), 100 µF capacitors, microstepping pins
 - [ ] Wiring diagrams in `docs/Electrical/wiring/` (WireViz) and a system power block diagram
