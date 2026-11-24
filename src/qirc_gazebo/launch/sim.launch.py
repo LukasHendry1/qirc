@@ -15,6 +15,13 @@ Arguments:
         with qirc_localization's EKF (ekf.launch.py), which then publishes
         odom -> base_link. With ekf:=false, DiffDrive's odometry publishes
         it instead.
+    odometry (default encoders): the EKF's speed source (ekf.launch.py).
+        encoders: DiffDrive's /odom, standing in for the drive motor
+        encoders. lidar: LiDAR odometry instead, to see how the robot does
+        without encoders.
+
+Also publishes the robot's true pose (/ground_truth, nav_msgs/Odometry in
+the world frame) for measuring localization error.
 """
 
 from launch import LaunchDescription
@@ -74,7 +81,10 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(PathJoinSubstitution([
             FindPackageShare('qirc_localization'), 'launch', 'ekf.launch.py',
         ])),
-        launch_arguments={'use_sim_time': 'true'}.items(),
+        launch_arguments={
+            'use_sim_time': 'true',
+            'odometry': LaunchConfiguration('odometry'),
+        }.items(),
         condition=IfCondition(LaunchConfiguration('ekf')),
     )
     odom_tf_bridge = Node(
@@ -99,6 +109,9 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'ekf', default_value='true',
             description='Run the EKF (odometry + gyro); false: use the raw odometry'),
+        DeclareLaunchArgument(
+            'odometry', default_value='encoders', choices=['encoders', 'lidar'],
+            description="The EKF's speed source: encoders (DiffDrive) or lidar"),
         gazebo,
         robot_description,
         spawn,

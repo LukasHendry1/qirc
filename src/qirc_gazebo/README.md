@@ -14,6 +14,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it
 | `world` | `obstacles.sdf` | World file in `worlds/`. `obstacles.sdf` has walls and boxes for the LiDAR to see; `empty.sdf` is just the ground. The house world is #28. |
 | `headless` | `false` | Run the Gazebo server only, without the GUI |
 | `ekf` | `true` | Fuse the odometry and the simulated gyro with the EKF (`qirc_localization`'s `ekf.launch.py`), which publishes `odom → base_link`. With `false`, DiffDrive's raw odometry publishes it instead. |
+| `odometry` | `encoders` | The EKF's speed source. `encoders`: DiffDrive's `/odom`, standing in for drive motor encoders. `lidar`: LiDAR odometry (`laser_odometry`) instead, to see how the robot does without encoders; `/odom` is then unused. |
 
 To see the robot and scan in RViz, run `rviz2` and set the fixed frame to `odom`.
 
@@ -22,7 +23,7 @@ To see the robot and scan in RViz, run `rviz2` and set the fixed frame to `odom`
 - **Gazebo** with the world, through `ros_gz_sim`
 - **`robot_state_publisher`** with the robot model built with `sim:=true` (`qirc_description/urdf/gazebo.urdf.xacro`), on simulation time
 - **Spawns the robot** from `/robot_description`
-- **The EKF** (`ekf:=true`): `imu_bias` and `robot_localization`, from `qirc_localization`
+- **The EKF** (`ekf:=true`): `imu_bias` and `robot_localization`, from `qirc_localization`, plus `laser_odometry` with `odometry:=lidar`
 - **`ros_gz_bridge`**, configured in `config/`:
 
 | ROS topic | Direction | Type |
@@ -36,6 +37,7 @@ To see the robot and scan in RViz, run `rviz2` and set the fixed frame to `odom`
 | `/front_camera/color/image_raw`, `/front_camera/color/camera_info` | Gazebo → ROS | colour image, frame `front_camera_color_optical_frame` |
 | `/front_camera/aligned_depth_to_color/image_raw`, `.../camera_info` | Gazebo → ROS | depth aligned to the colour image, 32FC1 in metres |
 | `/front_camera/imu` | Gazebo → ROS | `sensor_msgs/Imu`, frame `front_camera_imu_optical_frame` |
+| `/ground_truth` | Gazebo → ROS | `nav_msgs/Odometry`: the robot's **true** pose in the world, for measuring localization error. Simulation only. |
 
 ## The simulated robot
 

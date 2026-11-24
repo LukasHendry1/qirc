@@ -11,11 +11,14 @@ still, the gyro should read zero, and what it reads is the bias.
 Subscribes:
     /front_camera/imu        sensor_msgs/Imu, from realsense2_camera or Gazebo
     /odom                    nav_msgs/Odometry, to tell when the robot is still
+                             (the odom_topic parameter; /laser_odom when the
+                             LiDAR stands in for the encoders)
 Publishes:
     /front_camera/imu/unbiased   the same, minus the gyro bias, with the
                                  covariances the EKF needs
 
 Node parameters:
+    odom_topic: the odometry to tell stillness from (default /odom).
     still_speed (m/s), still_turn_rate (rad/s): the robot counts as still
         when the odometry is below both...
     settle_time (s): ...for this long (so it has stopped rocking).
@@ -59,6 +62,7 @@ class ImuBias(Node):
 
     def __init__(self):
         super().__init__('imu_bias')
+        self.declare_parameter('odom_topic', '/odom')
         self.declare_parameter('still_speed', 0.01)
         self.declare_parameter('still_turn_rate', 0.01)
         self.declare_parameter('settle_time', 0.5)
@@ -81,7 +85,8 @@ class ImuBias(Node):
         self.pub = self.create_publisher(Imu, '/front_camera/imu/unbiased', 50)
         self.create_subscription(
             Imu, '/front_camera/imu', self.imu_callback, qos_profile_sensor_data)
-        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.create_subscription(
+            Odometry, self.get_parameter('odom_topic').value, self.odom_callback, 10)
 
     def odom_callback(self, msg):
         twist = msg.twist.twist

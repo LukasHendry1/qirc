@@ -104,6 +104,8 @@ def test_bridged_ros_topics():
         '/front_camera/aligned_depth_to_color/image_raw': 'GZ_TO_ROS',
         '/front_camera/aligned_depth_to_color/camera_info': 'GZ_TO_ROS',
         '/front_camera/imu': 'GZ_TO_ROS',
+        # The true pose, for measuring localization error.
+        '/ground_truth': 'GZ_TO_ROS',
     }
 
 

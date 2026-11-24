@@ -21,6 +21,8 @@
                          to realsense2_camera's topic names
     /front_camera/imu
                     out  sensor_msgs/Imu, gyro and accelerometer, like the D435i
+    /ground_truth   out  nav_msgs/Odometry, the robot's true pose in the world
+                         (for measuring localization error)
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -303,6 +305,18 @@
     <plugin filename="ignition-gazebo-joint-state-publisher-system"
             name="ignition::gazebo::systems::JointStatePublisher">
       <topic>/joint_states</topic>
+    </plugin>
+
+    <!-- The robot's true pose in the world, for measuring localization
+         error (not something the real robot has). Its TF isn't bridged:
+         it would clash with the robot's own odom -> base_link. -->
+    <plugin filename="ignition-gazebo-odometry-publisher-system"
+            name="ignition::gazebo::systems::OdometryPublisher">
+      <odom_frame>world</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <odom_topic>/ground_truth</odom_topic>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <dimensions>2</dimensions>
     </plugin>
   </gazebo>
 

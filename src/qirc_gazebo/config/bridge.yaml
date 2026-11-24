@@ -21,6 +21,13 @@
   gz_type_name: ignition.msgs.Odometry
   direction: GZ_TO_ROS
 
+# The robot's true pose, for measuring localization error (simulation only).
+- ros_topic_name: /ground_truth
+  gz_topic_name: /ground_truth
+  ros_type_name: nav_msgs/msg/Odometry
+  gz_type_name: ignition.msgs.Odometry
+  direction: GZ_TO_ROS
+
 - ros_topic_name: /joint_states
   gz_topic_name: /joint_states
   ros_type_name: sensor_msgs/msg/JointState

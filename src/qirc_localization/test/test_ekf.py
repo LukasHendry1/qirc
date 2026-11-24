@@ -58,7 +58,8 @@ def test_launch_starts_imu_bias_and_ekf():
     description = module.generate_launch_description()
     assert isinstance(description, LaunchDescription)
     nodes = {e.node_executable for e in description.entities if isinstance(e, Node)}
-    assert nodes == {'imu_bias', 'ekf_node'}
+    # laser_odometry only runs with odometry:=lidar (a launch condition).
+    assert nodes == {'imu_bias', 'ekf_node', 'laser_odometry'}
 
 
 def test_gyro_bias_starts_unknown_at_zero():

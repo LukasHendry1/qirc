@@ -89,4 +89,4 @@ def test_simulation_arguments_are_passed_on(entities):
                       and 'sim.launch.py' in e.launch_description_source.location)
     names = {name[0].text if isinstance(name, list) else name
              for name, _ in simulation.launch_arguments}
-    assert names == {'world', 'headless'}
+    assert names == {'world', 'headless', 'odometry'}
