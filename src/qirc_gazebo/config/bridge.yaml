@@ -1,7 +1,7 @@
 # ros_gz_bridge topics between Gazebo and ROS, started by sim.launch.py.
 # The Gazebo topic names are set in qirc_description/urdf/gazebo.urdf.xacro.
-# DiffDrive's odom -> base_link TF is in bridge_odom_tf.yaml, which
-# sim.launch.py only starts with ekf:=false (otherwise the EKF publishes it).
+# DiffDrive's wheel odometry is deliberately not bridged: the robot has no
+# drive encoders, so the stack's odometry comes from the LiDAR.
 
 - ros_topic_name: /clock
   gz_topic_name: /clock
@@ -15,8 +15,9 @@
   gz_type_name: ignition.msgs.Twist
   direction: ROS_TO_GZ
 
-- ros_topic_name: /odom
-  gz_topic_name: /odom
+# The robot's true pose, for measuring localization error (simulation only).
+- ros_topic_name: /ground_truth
+  gz_topic_name: /ground_truth
   ros_type_name: nav_msgs/msg/Odometry
   gz_type_name: ignition.msgs.Odometry
   direction: GZ_TO_ROS

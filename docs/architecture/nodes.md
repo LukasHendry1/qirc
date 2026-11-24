@@ -21,9 +21,9 @@ Vendor packages, configured and launched from this repo.
 
 | Node | Package | Status | Subscribes | Publishes |
 |---|---|---|---|---|
-| `qirc_pico_bridge` | `qirc_pico_bridge` | planned (#7) | `/cmd_vel`, `/lights`, `/dispenser/command`, `/arm/command` | `/odom`, `/estop`, `/battery`, `/dispenser/state`, `/arm/joint_states` |
+| `qirc_pico_bridge` | `qirc_pico_bridge` | planned (#7) | `/cmd_vel`, `/lights`, `/dispenser/command`, `/arm/command` | `/estop`, `/battery`, `/dispenser/state`, `/arm/joint_states` |
 
-The only node that talks to the Pico (one serial port, one owner). It relays commands and state and contains no multi-step logic. It publishes `/odom` but **not** the `odom → base_link` transform; the EKF publishes that.
+The only node that talks to the Pico (one serial port, one owner). It relays commands and state and contains no multi-step logic. The drive motors have no encoders, so it publishes no odometry: that comes from the LiDAR (`laser_odometry`).
 
 ## Simulation (`qirc_gazebo`)
 
@@ -32,10 +32,8 @@ Replaces the sensor drivers and the hardware bridge when running in Gazebo Fortr
 | Node | Package | Status | Subscribes | Publishes |
 |---|---|---|---|---|
 | `ign gazebo` | Gazebo Fortress, via `ros_gz_sim` | integrated | – | (Gazebo topics, bridged below) |
-| `gz_bridge` | `ros_gz_bridge` | integrated | `/cmd_vel` | `/clock`, `/odom`, `/joint_states`, `/scan`, `/front_camera/color/*`, `/front_camera/aligned_depth_to_color/*`, `/front_camera/imu` |
-| `gz_odom_tf_bridge` | `ros_gz_bridge` | integrated | – | TF: `odom → base_link` (from DiffDrive; only with `ekf:=false`) |
-
-By default `sim.launch.py` also starts the EKF (`imu_bias` and `ekf` below), which publishes `odom → base_link` instead.
+| `gz_bridge` | `ros_gz_bridge` | integrated | `/cmd_vel` | `/clock`, `/ground_truth`, `/joint_states`, `/scan`, `/front_camera/color/*`, `/front_camera/aligned_depth_to_color/*`, `/front_camera/imu` |
+`sim.launch.py` also starts the EKF (`laser_odometry`, `imu_bias` and `ekf` below), which publishes `odom → base_link`. DiffDrive's wheel odometry isn't bridged, because the real robot has no drive encoders. `/ground_truth` is the robot's true pose, for measuring localization error (`odometry_test`).
 
 ## Infrastructure
 
@@ -44,13 +42,14 @@ Standard packages, configured in this repo.
 | Node | Package (configured in) | Status | Subscribes | Publishes |
 |---|---|---|---|---|
 | `robot_state_publisher` | `robot_state_publisher` (`qirc_description`) | integrated | URDF | `/robot_description`, TF: `base_link` → sensor and track frames |
-| `imu_bias` | `qirc_localization` | integrated, in simulation (#54) | `/front_camera/imu`, `/odom` | `/front_camera/imu/unbiased` |
-| `ekf` | `robot_localization` (`qirc_localization`) | integrated, in simulation (#54) | `/odom`, `/front_camera/imu/unbiased` | `/odometry/filtered`, TF: `odom → base_link` |
+| `laser_odometry` | `qirc_localization` | integrated, in simulation | `/scan` | `/laser_odom` |
+| `imu_bias` | `qirc_localization` | integrated, in simulation (#54) | `/front_camera/imu`, `/laser_odom` | `/front_camera/imu/unbiased` |
+| `ekf` | `robot_localization` (`qirc_localization`) | integrated, in simulation (#54) | `/laser_odom`, `/front_camera/imu/unbiased` | `/odometry/filtered`, TF: `odom → base_link` |
 | `twist_mux` | `twist_mux` (`qirc_control`) | planned (#16) | `/cmd_vel_nav`, `/cmd_vel_teleop`, `/cmd_vel_web`, `/estop` (lock) | `/cmd_vel` |
 | `teleop` | `teleop_twist_keyboard` / `teleop_twist_joy` | planned (#16) | – | `/cmd_vel_teleop` |
 | `foxglove_bridge` | `foxglove_bridge` (`qirc_bringup`) | planned (#15) | any topic (development visualization) | – |
 
-The EKF (`qirc_localization/launch/ekf.launch.py`, config in `config/ekf.yaml`) takes forward speed from the track odometry and turns from the D435i's gyro, because the tracks skid when turning. `imu_bias` first removes the gyro's bias, which it measures whenever the odometry says the robot is still; robot_localization can't estimate it. On the real robot this needs the D435i's frames under `front_camera_link` (#22) and `/odom` from the Pico bridge (#47).
+The robot has no drive encoders, so `laser_odometry` provides its odometry: it matches each LiDAR scan to an earlier one (point-to-line ICP) and publishes the motion on `/laser_odom`. The EKF (`qirc_localization/launch/ekf.launch.py`, config in `config/ekf.yaml`) fuses its speeds and turn rate with the D435i's gyro. `imu_bias` first removes the gyro's bias, which it measures whenever the LiDAR odometry says the robot is still; robot_localization can't estimate it. On the real robot this needs the D435i's frames under `front_camera_link` (#22) and the LiDAR's `laser` frame in the URDF.
 
 ## Perception (`qirc_perception`)
 

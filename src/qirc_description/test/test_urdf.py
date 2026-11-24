@@ -233,14 +233,13 @@ def test_diff_drive_geometry_matches_the_tracks(sim_robot):
     assert float(plugin.findtext('wheel_radius')) == pytest.approx(track_z)
 
 
-def test_diff_drive_topics_and_frames(sim_robot):
+def test_diff_drive_topics(sim_robot):
     # Must match qirc_gazebo/config/bridge.yaml and REP 105.
     plugin = _plugin(sim_robot, 'DiffDrive')
     assert plugin.findtext('topic') == '/cmd_vel'
-    assert plugin.findtext('odom_topic') == '/odom'
-    assert plugin.findtext('tf_topic') == '/odom/tf'
-    assert plugin.findtext('frame_id') == 'odom'
-    assert plugin.findtext('child_frame_id') == 'base_link'
+    # No drive encoders: DiffDrive's wheel odometry must not reach the stack.
+    assert plugin.find('odom_topic') is None
+    assert plugin.find('tf_topic') is None
     assert _plugin(sim_robot, 'JointStatePublisher').findtext('topic') == '/joint_states'
 
 

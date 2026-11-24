@@ -1,15 +1,17 @@
-# robot_localization EKF: fuses the track odometry and the front camera's
+# robot_localization EKF: fuses the LiDAR odometry and the front camera's
 # gyro into odom -> base_link. Started by launch/ekf.launch.py.
 #
+# The robot has no drive motor encoders: its speed comes from LiDAR
+# odometry (laser_odometry, scan matching).
+#
 # Why these inputs:
-#   - Track odometry is good for speed but bad for turns: the tracks skid
-#     sideways, so turns on the spot are over- or under-counted (#57).
-#   - The gyro measures turns directly. slam_toolbox adds no scans while
-#     the robot turns on the spot, so this is what carries the heading
-#     through a turn. Its bias is removed first by imu_bias.
-#   - The accelerometer is not used: integrating it for speed drifts, and
-#     the odometry already gives speed.
-
+#   - LiDAR odometry gives the speed (forward, sideways) and the turn rate.
+#     It runs at the LiDAR's 10 Hz, a little behind the robot, and is weak
+#     where the walls are all parallel (it then reports a large covariance).
+#   - The gyro measures turns directly at 200 Hz, so it carries the heading
+#     between scans and through poor matches. Its bias is removed first by
+#     imu_bias.
+#   - The accelerometer is not used: integrating it for speed drifts.
 ekf_filter_node:
   ros__parameters:
     frequency: 50.0
@@ -27,14 +29,13 @@ ekf_filter_node:
     #                   vx, vy, vz, vroll, vpitch, vyaw,
     #                   ax, ay, az].
 
-    # Track odometry: forward speed, and zero sideways speed (tracks can't
-    # move sideways). Not its turn rate (skid), nor its pose (that would be
-    # the odometry's integrated heading, skid errors and all).
-    odom0: /odom
+    # LiDAR odometry: speeds and turn rate. Not its pose: that is its own
+    # integrated estimate, which drifts; the EKF integrates the speeds itself.
+    odom0: /laser_odom
     odom0_config: [false, false, false,
                    false, false, false,
                    true,  true,  false,
-                   false, false, false,
+                   false, false, true,
                    false, false, false]
 
     # Gyro: turn rate only. This config is in the IMU's own frame

@@ -1290,7 +1290,7 @@
 <polygon fill="none" stroke="black" points="8932.5,-891 8932.5,-914 9232.5,-914 9232.5,-891 8932.5,-891"/>
 <text text-anchor="start" x="9074" y="-898.8" font-family="arial" font-size="14.00">M&#45;</text>
 <polygon fill="none" stroke="black" points="8645.5,-868 8645.5,-891 9232.5,-891 9232.5,-868 8645.5,-868"/>
-<text text-anchor="start" x="8832.5" y="-875.8" font-family="arial" font-size="14.00">No encoder (encoder solution TBD)</text>
+<text text-anchor="start" x="8801" y="-875.8" font-family="arial" font-size="14.00">No encoder; odometry comes from the LiDAR</text>
 </g>
 <!-- F_MD_R -->
 <g id="node19" class="node">
@@ -1427,7 +1427,7 @@
 <polygon fill="none" stroke="black" points="8932.5,-579 8932.5,-602 9236.5,-602 9236.5,-579 8932.5,-579"/>
 <text text-anchor="start" x="9076" y="-586.8" font-family="arial" font-size="14.00">M&#45;</text>
 <polygon fill="none" stroke="black" points="8641.5,-556 8641.5,-579 9236.5,-579 9236.5,-556 8641.5,-556"/>
-<text text-anchor="start" x="8832.5" y="-563.8" font-family="arial" font-size="14.00">No encoder (encoder solution TBD)</text>
+<text text-anchor="start" x="8801" y="-563.8" font-family="arial" font-size="14.00">No encoder; odometry comes from the LiDAR</text>
 </g>
 <!-- DC12 -->
 <g id="node22" class="node">

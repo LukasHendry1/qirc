@@ -26,6 +26,8 @@ setup(
     entry_points={
         'console_scripts': [
             'imu_bias = qirc_localization.imu_bias:main',
+            'laser_odometry = qirc_localization.laser_odometry:main',
+            'odometry_test = qirc_localization.odometry_test:main',
             'save_map = qirc_localization.save_map:main',
         ],
     },

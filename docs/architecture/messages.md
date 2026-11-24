@@ -14,8 +14,8 @@ The message types used between QIRC nodes. See [nodes.md](nodes.md) for which no
 | `/front_camera/imu` | `sensor_msgs/Imu` | front_camera → ekf |
 | `/rear_camera/rgb/image_raw` | `sensor_msgs/Image` | rear_camera → web_video_server |
 | `/rear_camera/nn/spatial_detections` | `vision_msgs/Detection3DArray` | rear_camera → rear_detection |
-| `/scan` | `sensor_msgs/LaserScan` | rplidar → slam_toolbox, local_planner |
-| `/odom` | `nav_msgs/Odometry` | qirc_pico_bridge → ekf (raw track odometry) |
+| `/scan` | `sensor_msgs/LaserScan` | rplidar → laser_odometry, slam_toolbox, local_planner |
+| `/laser_odom` | `nav_msgs/Odometry` | laser_odometry → ekf, imu_bias (LiDAR odometry; no drive encoders) |
 | `/odometry/filtered` | `nav_msgs/Odometry` | ekf → control |
 | `/map` | `nav_msgs/OccupancyGrid` | slam_toolbox → global_planner |
 | `/detections` | `vision_msgs/Detection3DArray` | front_detection, rear_detection → user_detection, local_planner |

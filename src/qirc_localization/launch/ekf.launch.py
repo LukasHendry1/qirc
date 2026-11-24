@@ -1,17 +1,20 @@
 """
-Fuse the track odometry and the front camera's gyro (robot_localization EKF).
+Estimate the robot's motion from the LiDAR and the front camera's gyro.
 
     # Simulation: sim.launch.py (qirc_gazebo) starts this itself.
     ros2 launch qirc_localization ekf.launch.py
 
+The robot has no drive motor encoders, so its speed comes from LiDAR
+odometry (scan matching).
+
 Starts:
+    laser_odometry    scan matching: /scan -> /laser_odom
     imu_bias          removes the gyro bias, measured while the robot is
                       still: /front_camera/imu -> /front_camera/imu/unbiased
-    ekf_filter_node   /odom + /front_camera/imu/unbiased -> /odometry/filtered
-                      and the odom -> base_link transform
+    ekf_filter_node   /laser_odom + /front_camera/imu/unbiased ->
+                      /odometry/filtered and the odom -> base_link transform
 
-Nothing else may publish odom -> base_link: in simulation, sim.launch.py
-stops DiffDrive's transform when it starts this. Parameters are in
+Nothing else may publish odom -> base_link. Parameters are in
 config/ekf.yaml.
 
 Launch arguments:
@@ -33,6 +36,13 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_sim_time', default_value='false',
             description='Use the simulation clock (/clock)'),
+        Node(
+            package='qirc_localization',
+            executable='laser_odometry',
+            name='laser_odometry',
+            parameters=[{'use_sim_time': use_sim_time}],
+            output='screen',
+        ),
         Node(
             package='qirc_localization',
             executable='imu_bias',

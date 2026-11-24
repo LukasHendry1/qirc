@@ -5,12 +5,13 @@ A MEMS gyro reads a small rate even when it isn't turning (its bias); the
 D435i's can be around 0.5 deg/s. The EKF integrates the gyro for the
 heading, so an uncorrected bias turns the robot ~30 degrees a minute on the
 map while it stands still. robot_localization can't estimate the bias
-itself, so this node does: whenever the track odometry says the robot is
+itself, so this node does: whenever the LiDAR odometry says the robot is
 still, the gyro should read zero, and what it reads is the bias.
 
 Subscribes:
     /front_camera/imu        sensor_msgs/Imu, from realsense2_camera or Gazebo
-    /odom                    nav_msgs/Odometry, to tell when the robot is still
+    /laser_odom              nav_msgs/Odometry (laser_odometry), to tell when
+                             the robot is still
 Publishes:
     /front_camera/imu/unbiased   the same, minus the gyro bias, with the
                                  covariances the EKF needs
@@ -81,7 +82,7 @@ class ImuBias(Node):
         self.pub = self.create_publisher(Imu, '/front_camera/imu/unbiased', 50)
         self.create_subscription(
             Imu, '/front_camera/imu', self.imu_callback, qos_profile_sensor_data)
-        self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.create_subscription(Odometry, '/laser_odom', self.odom_callback, 10)
 
     def odom_callback(self, msg):
         twist = msg.twist.twist

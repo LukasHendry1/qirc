@@ -6,20 +6,23 @@ sim:=true) from robot_state_publisher on simulation time, spawns the robot
 from /robot_description, and bridges the topics in config/ between Gazebo
 and ROS.
 
+Also starts qirc_localization's EKF (ekf.launch.py): LiDAR odometry and the
+simulated D435i's gyro, which publishes odom -> base_link. As on the real
+robot, there are no drive encoders: DiffDrive only moves the robot, and its
+wheel odometry isn't bridged.
+
+Also publishes the robot's true pose (/ground_truth, nav_msgs/Odometry in
+the world frame) for measuring localization error.
+
 Arguments:
     world (default obstacles.sdf): world file in qirc_gazebo/worlds.
         obstacles.sdf has a few walls and boxes for the LiDAR to see;
         empty.sdf is just the ground.
     headless (default false): run the Gazebo server only, without the GUI.
-    ekf (default true): fuse the odometry and the simulated D435i's gyro
-        with qirc_localization's EKF (ekf.launch.py), which then publishes
-        odom -> base_link. With ekf:=false, DiffDrive's odometry publishes
-        it instead.
 """
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch_ros.actions import Node
@@ -58,35 +61,23 @@ def generate_launch_description():
         output='screen',
     )
 
-    config = PathJoinSubstitution([FindPackageShare('qirc_gazebo'), 'config'])
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         name='gz_bridge',
         parameters=[{
-            'config_file': PathJoinSubstitution([config, 'bridge.yaml']),
+            'config_file': PathJoinSubstitution([
+                FindPackageShare('qirc_gazebo'), 'config', 'bridge.yaml']),
             'use_sim_time': True,
         }],
         output='screen',
     )
-    # Exactly one of these publishes odom -> base_link.
+    # The only source of odom -> base_link.
     ekf = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([
             FindPackageShare('qirc_localization'), 'launch', 'ekf.launch.py',
         ])),
         launch_arguments={'use_sim_time': 'true'}.items(),
-        condition=IfCondition(LaunchConfiguration('ekf')),
-    )
-    odom_tf_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='gz_odom_tf_bridge',
-        parameters=[{
-            'config_file': PathJoinSubstitution([config, 'bridge_odom_tf.yaml']),
-            'use_sim_time': True,
-        }],
-        condition=UnlessCondition(LaunchConfiguration('ekf')),
-        output='screen',
     )
 
     return LaunchDescription([
@@ -96,13 +87,9 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'headless', default_value='false',
             description='Run the Gazebo server only, without the GUI'),
-        DeclareLaunchArgument(
-            'ekf', default_value='true',
-            description='Run the EKF (odometry + gyro); false: use the raw odometry'),
         gazebo,
         robot_description,
         spawn,
         bridge,
         ekf,
-        odom_tf_bridge,
     ])

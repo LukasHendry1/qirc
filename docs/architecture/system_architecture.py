@@ -130,7 +130,7 @@ stack(370, 380, 540, 420, 'Localization Stack (qirc_localization)', 'localizatio
 box(410, 500, 220, 140, ['SLAM (slam_toolbox):', '- Mapping mode: builds', '  the house map',
                          '- Localization mode:', '  pose on the saved map'])
 diamond(795, 570, 95, 60, ['House Map'])
-box(410, 670, 220, 85, ['Sensor Fusion (EKF):', 'track odometry (/odom)', '+ IMU'])
+box(410, 670, 220, 85, ['Sensor Fusion (EKF):', 'LiDAR odometry', '+ IMU gyro'])
 
 # Planning
 stack(935, 100, 470, 700, 'Planning Stack (qirc_planning)', 'planning')
@@ -161,7 +161,7 @@ box(1460, 660, 300, 120, ['Command Mux (twist_mux):', 'picks nav / teleop / web'
 stack(1815, 100, 245, 965, 'Hardware Bridge', 'bridge')
 box(1835, 145, 205, 900, ['qirc_pico_bridge', '', 'The only node that', 'talks to the Pico', '',
                           'Sends:', 'track speeds, lights,', 'dispenser and arm', 'commands', '',
-                          'Receives:', '/odom, /estop, /battery,', 'dispenser state,',
+                          'Receives:', '/estop, /battery,', 'dispenser state,',
                           'arm joint states'])
 
 # Web app
@@ -185,9 +185,9 @@ box(1450, 1008, 320, 45, ['foxglove_bridge (dev tools)'])
 box(2150, 150, 250, 90, ['Stepper Control:', 'STEP/DIR to 2× DRV8825,', 'counts steps from power-on'])
 box(2150, 300, 250, 90, ['Arm Motor Control:', 'PWM/IN to TB6612FNG,', 'position from encoders'])
 box(2150, 445, 250, 80, ['Lights:', 'WS2813 status patterns,', 'headlight PWM'])
-box(2150, 655, 250, 130, ['Drive Control:', 'per-track speed PID;', 'watchdog stops the motors',
+box(2150, 655, 250, 130, ['Drive Control:', 'per-track PWM (open loop);', 'watchdog stops the motors',
                           'if commands stop arriving'])
-box(2150, 860, 250, 160, ['Sensing:', 'drive encoder counts (PIO)', 'E-stop state',
+box(2150, 860, 250, 160, ['Sensing:', 'arm encoder counts (PIO)', 'E-stop state',
                           'battery voltage / current'])
 
 # --------------------------------------------------------------------------
@@ -197,7 +197,7 @@ ellipse(2605, 195, 120, 55, ['Dispensing Motors', '2× NEMA 17 stepper'])
 ellipse(2605, 345, 120, 55, ['Arm Motors', '2× JGB37-520'])
 ellipse(2605, 485, 120, 50, ['Status LEDs', '& Headlights'])
 ellipse(2605, 720, 120, 70, ['Drive Motors', '(left / right tracks)', '2× E-S 36PG'])
-ellipse(2605, 880, 120, 50, ['Drive Encoders', '(TBD)'])
+ellipse(2605, 880, 120, 50, ['Arm Encoders', '(Hall, in the motors)'])
 ellipse(2605, 1005, 120, 58, ['E-stop and', 'Battery Monitor'])
 
 # --------------------------------------------------------------------------

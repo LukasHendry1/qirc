@@ -38,11 +38,11 @@ def test_ekf_frames(ekf):
     assert ekf['two_d_mode'] is True
 
 
-def test_ekf_takes_speed_from_odometry_and_turns_from_gyro(ekf):
-    # Track odometry's turn rate is wrong when the tracks skid, so turns come
-    # from the gyro only; odometry gives forward (and zero sideways) speed.
-    assert ekf['odom0'] == '/odom'
-    assert _fused(ekf['odom0_config']) == {'vx', 'vy'}
+def test_ekf_takes_speed_from_lidar_odometry_and_turns_from_both(ekf):
+    # No drive encoders: speeds and turn rate come from LiDAR odometry, never
+    # its pose (which drifts); the gyro adds the turn rate between scans.
+    assert ekf['odom0'] == '/laser_odom'
+    assert _fused(ekf['odom0_config']) == {'vx', 'vy', 'vyaw'}
     # The gyro after imu_bias has removed its bias. The config is in the
     # IMU's optical frame, so all three rates: the EKF rotates them into
     # base_link and keeps only the yaw rate in 2D mode.
@@ -58,7 +58,8 @@ def test_launch_starts_imu_bias_and_ekf():
     description = module.generate_launch_description()
     assert isinstance(description, LaunchDescription)
     nodes = {e.node_executable for e in description.entities if isinstance(e, Node)}
-    assert nodes == {'imu_bias', 'ekf_node'}
+    assert nodes == {'laser_odometry', 'imu_bias', 'ekf_node'}
+    assert not any(isinstance(e, Node) and e.condition for e in description.entities)
 
 
 def test_gyro_bias_starts_unknown_at_zero():

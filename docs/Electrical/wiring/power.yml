@@ -115,12 +115,12 @@ connectors:
     type: Drive motor left
     subtype: E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall
     pinlabels: [M+, M-]
-    notes: No encoder (encoder solution TBD)
+    notes: No encoder; odometry comes from the LiDAR
   M_R:
     type: Drive motor right
     subtype: E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall
     pinlabels: [M+, M-]
-    notes: No encoder (encoder solution TBD)
+    notes: No encoder; odometry comes from the LiDAR
 
   # --- Arm -----------------------------------------------------------------
   AD:
