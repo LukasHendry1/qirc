@@ -14,7 +14,7 @@ import yaml
 
 PACKAGE_DIR = Path(__file__).resolve().parents[1]
 WORLDS = sorted((PACKAGE_DIR / 'worlds').glob('*.sdf'))
-BRIDGE_FILES = ('bridge.yaml', 'bridge_odom_tf.yaml')
+BRIDGE_FILES = ('bridge.yaml',)
 
 
 def _load(name):
@@ -57,26 +57,22 @@ def _bridge(name):
     return yaml.safe_load((PACKAGE_DIR / 'config' / name).read_text())
 
 
-def test_launch_starts_both_bridges():
+def test_launch_starts_one_bridge():
     bridges = [e for e in _load('sim.launch.py')
                if isinstance(e, Node) and e.node_executable == 'parameter_bridge']
     assert len(bridges) == len(BRIDGE_FILES)
-    # Only the odom TF bridge is conditional: off while the EKF runs.
-    assert sum(b.condition is not None for b in bridges) == 1
+    assert all(b.condition is None for b in bridges)
 
 
-def test_ekf_or_odometry_publishes_odom_tf():
+def test_ekf_always_publishes_odom_tf():
+    # No drive encoders, so no wheel-odometry fallback: the EKF (on LiDAR
+    # odometry) always runs and is the only source of odom -> base_link.
     entities = _load('sim.launch.py')
-    arguments = {e.name: e.default_value[0].text for e in entities
-                 if isinstance(e, DeclareLaunchArgument)}
-    assert arguments['ekf'] == 'true'
+    arguments = {e.name for e in entities if isinstance(e, DeclareLaunchArgument)}
+    assert arguments == {'world', 'headless'}
     ekf = [e for e in entities if isinstance(e, IncludeLaunchDescription)
-           and e.condition is not None]
-    odom_tf = [e for e in entities if isinstance(e, Node) and e.condition is not None]
-    assert len(ekf) == 1 and len(odom_tf) == 1
-    # One runs with ekf:=true, the other with ekf:=false: never both.
-    assert type(ekf[0].condition).__name__ == 'IfCondition'
-    assert type(odom_tf[0].condition).__name__ == 'UnlessCondition'
+           and 'ekf.launch.py' in e.launch_description_source.location]
+    assert len(ekf) == 1 and ekf[0].condition is None
 
 
 @pytest.mark.parametrize('name', BRIDGE_FILES)
@@ -94,8 +90,6 @@ def test_bridged_ros_topics():
     assert topics == {
         '/clock': 'GZ_TO_ROS',
         '/cmd_vel': 'ROS_TO_GZ',
-        '/odom': 'GZ_TO_ROS',
-        '/tf': 'GZ_TO_ROS',
         '/joint_states': 'GZ_TO_ROS',
         '/scan': 'GZ_TO_ROS',
         # The D435i, under realsense2_camera's names.
@@ -109,9 +103,9 @@ def test_bridged_ros_topics():
     }
 
 
-def test_odom_tf_only_in_its_own_bridge():
-    assert all(e['ros_topic_name'] != '/tf' for e in _bridge('bridge.yaml'))
-    assert [e['ros_topic_name'] for e in _bridge('bridge_odom_tf.yaml')] == ['/tf']
+def test_no_wheel_odometry_bridged():
+    topics = {e['ros_topic_name'] for e in _bridge('bridge.yaml')}
+    assert '/odom' not in topics and '/tf' not in topics
 
 
 def test_every_robot_gazebo_topic_is_bridged():

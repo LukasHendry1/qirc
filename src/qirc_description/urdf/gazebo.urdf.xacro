@@ -10,10 +10,6 @@
 
   Gazebo topics (bridged to ROS by qirc_gazebo/config/bridge.yaml):
     /cmd_vel        in   geometry_msgs/Twist
-    /odom           out  nav_msgs/Odometry, odom -> base_link
-    /odom/tf        out  the same pose as TF; sim.launch.py bridges it to
-                         /tf only with ekf:=false (otherwise the EKF
-                         publishes odom -> base_link)
     /joint_states   out  wheel joints, for robot_state_publisher
     /scan           out  sensor_msgs/LaserScan in frame laser, like rplidar_ros
     /front_camera/image, /front_camera/depth_image, /front_camera/camera_info
@@ -36,12 +32,11 @@
 
   <!-- Effective track separation for DiffDrive = physical separation x this.
        Skid-steer tracks turn less than their wheel speeds suggest, because
-       the wheels slide sideways; with the physical separation, /odom
-       overestimated turns by 1.40x. Calibrating it (as #57 does on the real
-       robot) makes /odom's turns match the true ones to within ~3 degrees
-       per half turn, which slam_toolbox needs: it adds no scans while turning
-       on the spot, so odometry alone has to carry the heading through a turn.
-       Re-measure if road_wheel_mu or the wheel layout changes. -->
+       the wheels slide sideways: with the physical separation, the robot
+       turned 1.40x slower than commanded. With this factor it turns at the
+       commanded rate (to within ~3 degrees per half turn), so /cmd_vel means
+       the same in simulation as it should on the robot. Re-measure if
+       road_wheel_mu or the wheel layout changes. -->
   <xacro:property name="track_skid_factor" value="1.40"/>
 
   <!-- Wheel radius = track radius, so the wheels touch the ground exactly
@@ -295,11 +290,9 @@
       <wheel_separation>${2 * track_y * track_skid_factor}</wheel_separation>
       <wheel_radius>${road_wheel_radius}</wheel_radius>
       <topic>/cmd_vel</topic>
-      <odom_topic>/odom</odom_topic>
-      <tf_topic>/odom/tf</tf_topic>
-      <frame_id>odom</frame_id>
-      <child_frame_id>base_link</child_frame_id>
-      <odom_publish_frequency>50</odom_publish_frequency>
+      <!-- DiffDrive only moves the robot. Its wheel odometry isn't bridged
+           to ROS: the robot has no drive encoders, so the stack gets its
+           odometry from the LiDAR, as on the real robot. -->
     </plugin>
 
     <plugin filename="ignition-gazebo-joint-state-publisher-system"

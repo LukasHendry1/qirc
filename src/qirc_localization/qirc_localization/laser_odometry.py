@@ -1,8 +1,8 @@
 """
 Odometry from the LiDAR alone, by matching each scan to a recent one (ICP).
 
-Stands in for the drive motor encoders, which the robot doesn't have yet:
-the EKF fuses this instead of /odom when launched with odometry:=lidar.
+The robot has no drive motor encoders, so this is its odometry: the EKF
+(ekf.launch.py) fuses its speeds with the gyro.
 
 Each scan is matched to a keyframe, an earlier scan, with point-to-line ICP:
 the scan's points are moved until they lie on the lines (walls, furniture

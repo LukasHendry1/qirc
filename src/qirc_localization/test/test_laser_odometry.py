@@ -1,16 +1,12 @@
 """Check the LiDAR odometry's scan matching and the odometry test's error maths."""
 
 import math
-from pathlib import Path
 
 import numpy as np
 import pytest
 from qirc_localization.laser_odometry import (
     degenerate, Keyframe, match, pose_of, scan_points, se2)
 from qirc_localization.odometry_test import errors, relative_pose
-import yaml
-
-PACKAGE_DIR = Path(__file__).resolve().parents[1]
 
 ROOM = [((-3, -2), (4, -2)), ((4, -2), (4, 3)), ((4, 3), (-3, 3)), ((-3, 3), (-3, -2)),
         # a box in the room
@@ -80,12 +76,3 @@ def test_relative_pose_and_errors():
     position, heading = errors([[0, 0, math.pi - 0.05]], [[3, 4, -math.pi + 0.05]])
     assert position[0] == pytest.approx(5.0)
     assert heading[0] == pytest.approx(0.1)   # wraps across +-180 degrees
-
-
-def test_ekf_laser_overrides():
-    config = yaml.safe_load((PACKAGE_DIR / 'config' / 'ekf_laser_odometry.yaml').read_text())
-    params = config['ekf_filter_node']['ros__parameters']
-    assert params['odom0'] == '/laser_odom'
-    # Speeds (vx, vy) and turn rate (vyaw) only: never its pose, which drifts.
-    used = [i for i, on in enumerate(params['odom0_config']) if on]
-    assert used == [6, 7, 11]

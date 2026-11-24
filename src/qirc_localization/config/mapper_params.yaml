@@ -35,12 +35,9 @@ slam_toolbox:
     # When to add a scan: the defaults (minimum_travel_distance and
     # minimum_travel_heading 0.5) are kept. Note that slam_toolbox only
     # checks distance before adding a scan, so it adds NONE while the robot
-    # turns on the spot: the heading through such a turn comes from
-    # odometry alone, and the next scan match can only correct about
-    # +-20 degrees (coarse_search_angle_offset). The track odometry's turns
-    # must therefore be calibrated (effective track width, #57; in
-    # simulation, track_skid_factor in qirc_description's gazebo.urdf.xacro)
-    # and, on the real robot, fused with the IMU gyro (#54).
+    # turns on the spot: the heading through such a turn comes from the EKF
+    # alone (LiDAR odometry and the gyro), and the next scan match can only
+    # correct about +-20 degrees (coarse_search_angle_offset).
 
     # Allow for the simulation clock and a busy Jetson.
     transform_timeout: 0.2

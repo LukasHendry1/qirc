@@ -53,8 +53,8 @@
 <text x="795" y="570.0" font-size="15" text-anchor="middle" dominant-baseline="central">House Map</text>
 <rect x="410" y="670" width="220" height="85" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
 <text x="520.0" y="693.0" font-size="15" text-anchor="middle" dominant-baseline="central">Sensor Fusion (EKF):</text>
-<text x="520.0" y="712.5" font-size="15" text-anchor="middle" dominant-baseline="central">track odometry (/odom)</text>
-<text x="520.0" y="732.0" font-size="15" text-anchor="middle" dominant-baseline="central">+ IMU</text>
+<text x="520.0" y="712.5" font-size="15" text-anchor="middle" dominant-baseline="central">LiDAR odometry</text>
+<text x="520.0" y="732.0" font-size="15" text-anchor="middle" dominant-baseline="central">+ IMU gyro</text>
 <rect x="935" y="100" width="470" height="700" fill="#DAEEF3" stroke="#595959" stroke-width="1.2"/>
 <text x="945" y="122" font-size="16">Planning Stack (qirc_planning)</text>
 <rect x="1010" y="140" width="320" height="190" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
@@ -110,7 +110,7 @@
 <text x="1937.5" y="624.2" font-size="15" text-anchor="middle" dominant-baseline="central">commands</text>
 <text x="1937.5" y="643.8" font-size="15" text-anchor="middle" dominant-baseline="central"></text>
 <text x="1937.5" y="663.2" font-size="15" text-anchor="middle" dominant-baseline="central">Receives:</text>
-<text x="1937.5" y="682.8" font-size="15" text-anchor="middle" dominant-baseline="central">/odom, /estop, /battery,</text>
+<text x="1937.5" y="682.8" font-size="15" text-anchor="middle" dominant-baseline="central">/estop, /battery,</text>
 <text x="1937.5" y="702.2" font-size="15" text-anchor="middle" dominant-baseline="central">dispenser state,</text>
 <text x="1937.5" y="721.8" font-size="15" text-anchor="middle" dominant-baseline="central">arm joint states</text>
 <rect x="370" y="840" width="1035" height="225" fill="#E4DFEC" stroke="#595959" stroke-width="1.2"/>
@@ -154,12 +154,12 @@
 <text x="2275.0" y="504.5" font-size="15" text-anchor="middle" dominant-baseline="central">headlight PWM</text>
 <rect x="2150" y="655" width="250" height="130" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
 <text x="2275.0" y="690.8" font-size="15" text-anchor="middle" dominant-baseline="central">Drive Control:</text>
-<text x="2275.0" y="710.2" font-size="15" text-anchor="middle" dominant-baseline="central">per-track speed PID;</text>
+<text x="2275.0" y="710.2" font-size="15" text-anchor="middle" dominant-baseline="central">per-track PWM (open loop);</text>
 <text x="2275.0" y="729.8" font-size="15" text-anchor="middle" dominant-baseline="central">watchdog stops the motors</text>
 <text x="2275.0" y="749.2" font-size="15" text-anchor="middle" dominant-baseline="central">if commands stop arriving</text>
 <rect x="2150" y="860" width="250" height="160" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
 <text x="2275.0" y="910.8" font-size="15" text-anchor="middle" dominant-baseline="central">Sensing:</text>
-<text x="2275.0" y="930.2" font-size="15" text-anchor="middle" dominant-baseline="central">drive encoder counts (PIO)</text>
+<text x="2275.0" y="930.2" font-size="15" text-anchor="middle" dominant-baseline="central">arm encoder counts (PIO)</text>
 <text x="2275.0" y="949.8" font-size="15" text-anchor="middle" dominant-baseline="central">E-stop state</text>
 <text x="2275.0" y="969.2" font-size="15" text-anchor="middle" dominant-baseline="central">battery voltage / current</text>
 <ellipse cx="2605" cy="195" rx="120" ry="55" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
@@ -176,8 +176,8 @@
 <text x="2605" y="720.0" font-size="15" text-anchor="middle" dominant-baseline="central">(left / right tracks)</text>
 <text x="2605" y="739.5" font-size="15" text-anchor="middle" dominant-baseline="central">2× E-S 36PG</text>
 <ellipse cx="2605" cy="880" rx="120" ry="50" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
-<text x="2605" y="870.2" font-size="15" text-anchor="middle" dominant-baseline="central">Drive Encoders</text>
-<text x="2605" y="889.8" font-size="15" text-anchor="middle" dominant-baseline="central">(TBD)</text>
+<text x="2605" y="870.2" font-size="15" text-anchor="middle" dominant-baseline="central">Arm Encoders</text>
+<text x="2605" y="889.8" font-size="15" text-anchor="middle" dominant-baseline="central">(Hall, in the motors)</text>
 <ellipse cx="2605" cy="1005" rx="120" ry="58" fill="#FFFFFF" stroke="#000000" stroke-width="1.2"/>
 <text x="2605" y="995.2" font-size="15" text-anchor="middle" dominant-baseline="central">E-stop and</text>
 <text x="2605" y="1014.8" font-size="15" text-anchor="middle" dominant-baseline="central">Battery Monitor</text>

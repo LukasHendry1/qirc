@@ -25,6 +25,7 @@ flowchart LR
 
     subgraph INFRA["Infrastructure (standard packages)"]
         RSP["robot_state_publisher"]
+        LO["laser_odometry"]
         EKF["ekf<br/>(robot_localization)"]
         MUX["twist_mux"]
         TELEOP["teleop"]
@@ -63,13 +64,14 @@ flowchart LR
     FC -->|"/front_camera/color/image_raw<br/>/front_camera/aligned_depth_to_color/image_raw<br/>/front_camera/color/camera_info"| FD
     RC -->|"/rear_camera/nn/spatial_detections"| RD
     FC -->|"/front_camera/imu"| EKF
+    LIDAR -->|"/scan"| LO
     LIDAR -->|"/scan"| SLAM
     LIDAR -->|"/scan"| LP
     FC -->|"camera images"| WVS
     RC -->|"camera images"| WVS
 
     %% Odometry and TF
-    PB -->|"/odom"| EKF
+    LO -->|"/laser_odom"| EKF
     EKF -->|"/odometry/filtered"| LP
     RSP -.->|"base_link to sensor frames"| TF
     EKF -.->|"odom to base_link"| TF

@@ -13,8 +13,6 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it
 |---|---|---|
 | `world` | `obstacles.sdf` | World file in `worlds/`. `obstacles.sdf` has walls and boxes for the LiDAR to see; `empty.sdf` is just the ground. The house world is #28. |
 | `headless` | `false` | Run the Gazebo server only, without the GUI |
-| `ekf` | `true` | Fuse the odometry and the simulated gyro with the EKF (`qirc_localization`'s `ekf.launch.py`), which publishes `odom → base_link`. With `false`, DiffDrive's raw odometry publishes it instead. |
-| `odometry` | `encoders` | The EKF's speed source. `encoders`: DiffDrive's `/odom`, standing in for drive motor encoders. `lidar`: LiDAR odometry (`laser_odometry`) instead, to see how the robot does without encoders; `/odom` is then unused. |
 
 To see the robot and scan in RViz, run `rviz2` and set the fixed frame to `odom`.
 
@@ -23,15 +21,13 @@ To see the robot and scan in RViz, run `rviz2` and set the fixed frame to `odom`
 - **Gazebo** with the world, through `ros_gz_sim`
 - **`robot_state_publisher`** with the robot model built with `sim:=true` (`qirc_description/urdf/gazebo.urdf.xacro`), on simulation time
 - **Spawns the robot** from `/robot_description`
-- **The EKF** (`ekf:=true`): `imu_bias` and `robot_localization`, from `qirc_localization`, plus `laser_odometry` with `odometry:=lidar`
+- **The EKF** from `qirc_localization` (`laser_odometry`, `imu_bias` and `robot_localization`): LiDAR odometry plus the gyro, the only source of `odom → base_link`
 - **`ros_gz_bridge`**, configured in `config/`:
 
 | ROS topic | Direction | Type |
 |---|---|---|
 | `/clock` | Gazebo → ROS | `rosgraph_msgs/Clock` |
 | `/cmd_vel` | ROS → Gazebo | `geometry_msgs/Twist` |
-| `/odom` | Gazebo → ROS | `nav_msgs/Odometry` |
-| `/tf` | Gazebo → ROS | DiffDrive's `odom → base_link`, only with `ekf:=false` |
 | `/joint_states` | Gazebo → ROS | road wheel joints |
 | `/scan` | Gazebo → ROS | `sensor_msgs/LaserScan`, frame `laser` |
 | `/front_camera/color/image_raw`, `/front_camera/color/camera_info` | Gazebo → ROS | colour image, frame `front_camera_color_optical_frame` |
@@ -42,7 +38,8 @@ To see the robot and scan in RViz, run `rviz2` and set the fixed frame to `odom`
 ## The simulated robot
 
 - **Tracks:** each track is a row of 4 road wheels (collision only, so it still looks like a track) driven by Gazebo's `DiffDrive` system. This works on flat ground. Stairs need the `TrackedVehicle` system instead (#84).
-- **Turning skids, like the real tracks.** The front and back wheels drag sideways, so the robot turns about 1.4× less than its wheel speeds suggest. DiffDrive is given the **effective** track separation (`track_skid_factor` in `gazebo.urdf.xacro`), the same calibration #57 does on the real robot. With it, `/odom` matches the true pose within a few degrees per half turn. The EKF takes turns from the gyro instead, so its heading doesn't depend on this calibration; it matters with `ekf:=false`, since slam_toolbox adds no scans while the robot turns on the spot.
+- **No drive encoders, like the real robot.** DiffDrive only moves the robot: its wheel odometry isn't bridged, so the stack's odometry comes from the LiDAR.
+- **Turning skids, like the real tracks.** The front and back wheels drag sideways, so the robot turns about 1.4× less than its wheel speeds suggest. DiffDrive is given the **effective** track separation (`track_skid_factor` in `gazebo.urdf.xacro`), so the robot turns at the rate `/cmd_vel` asks for, within a few degrees per half turn.
 - **LiDAR:** set up like the RPLIDAR A2M8 with `rplidar_ros`: 360°, 10 Hz, 800 points per scan, 0.15–12 m, 1 cm noise.
 - **Front camera (RealSense D435i):** set up like `realsense2_camera` with `qirc_perception/config/front_camera.yaml`, so the same nodes run on both:
   - **Images:** colour and aligned depth at 848×480, 30 fps, 69°×42° (the colour camera's view, which aligned depth is cropped to on the real camera too). Depth from 0.195 m (the D435i's minimum at this resolution) to 10 m.

@@ -115,7 +115,7 @@ ros2 launch qirc_gazebo sim.launch.py
 ros2 run teleop_twist_keyboard teleop_twist_keyboard   # drive it (/cmd_vel)
 ```
 
-This also starts the EKF, which fuses the track odometry with the simulated D435i's gyro (`ekf:=false` to use the raw odometry instead).
+This also starts the EKF, which fuses LiDAR odometry with the simulated D435i's gyro. As on the real robot, there are no drive encoders: Gazebo only moves the robot, and the stack's odometry comes from the LiDAR (see [Odometry](#odometry-lidar-no-encoders)).
 
 To run the **whole stack** in simulation instead of on the robot, use bringup with `use_sim:=true`. It starts the simulation in place of the robot model and sensor drivers, and runs every node on simulation time:
 
@@ -136,19 +136,19 @@ On later runs, localize in the saved map instead. The robot should start where m
 ros2 launch qirc_localization localization.launch.py use_sim_time:=true rviz:=true map:=$HOME/qirc_maps/sim_obstacles
 ```
 
-#### Without drive motor encoders
+#### Odometry (LiDAR, no encoders)
 
-The drive motors have no encoders yet. To run as the robot would without them, add `odometry:=lidar` to the simulation (`sim.launch.py`, or bringup with `use_sim:=true`). The EKF then takes the robot's speed from LiDAR odometry (`laser_odometry`, scan matching) plus the gyro, and doesn't use `/odom`.
+The drive motors have no encoders, so the robot's odometry comes from the LiDAR. `laser_odometry` (in `qirc_localization`) matches each scan to an earlier one and publishes the motion on `/laser_odom`. The EKF fuses that with the gyro into `odom → base_link`, and `slam_toolbox` corrects the remaining drift against the map. In simulation this stayed within about 9 cm of the true pose over a 24 m loop ([comparison with simulated encoders](docs/Experiments/odometry_encoders_vs_lidar.png)).
 
-To measure the difference, `odometry_test` drives a fixed loop around `obstacles.sdf` and compares the odometry and SLAM poses with the true pose from Gazebo (`/ground_truth`). Run it with mapping running, once per odometry source:
+To measure localization accuracy, `odometry_test` drives a fixed loop around `obstacles.sdf` and compares the odometry and SLAM poses with the true pose from Gazebo (`/ground_truth`). Run it with mapping running:
 
 ```bash
-ros2 launch qirc_gazebo sim.launch.py headless:=true odometry:=lidar      # or encoders
+ros2 launch qirc_gazebo sim.launch.py headless:=true
 ros2 launch qirc_localization mapping.launch.py use_sim_time:=true rviz:=true
-ros2 run qirc_localization odometry_test --ros-args -p use_sim_time:=true -p output:=$HOME/qirc_tests/lidar
+ros2 run qirc_localization odometry_test --ros-args -p use_sim_time:=true -p output:=$HOME/qirc_tests/loop
 ```
 
-It writes the errors to `lidar.txt`, every sample to `lidar.csv`, and a plot of the paths and errors to `lidar.png`.
+It writes the errors to `loop.txt`, every sample to `loop.csv`, and a plot of the paths and errors to `loop.png`.
 
 See [`src/qirc_gazebo`](src/qirc_gazebo/README.md) for the worlds, topics and options.
 

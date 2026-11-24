@@ -8,7 +8,7 @@ Gazebo (/ground_truth), and records where the stack thinks it is:
 Both are compared with the true pose, taken relative to where the robot
 started, because odom and map both start at the robot's starting pose.
 
-    ros2 launch qirc_gazebo sim.launch.py headless:=true odometry:=lidar
+    ros2 launch qirc_gazebo sim.launch.py headless:=true
     ros2 launch qirc_localization mapping.launch.py use_sim_time:=true
     ros2 run qirc_localization odometry_test --ros-args
         -p use_sim_time:=true -p output:=~/qirc_tests/lidar      (one line)

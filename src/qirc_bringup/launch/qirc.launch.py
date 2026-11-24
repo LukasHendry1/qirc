@@ -16,8 +16,7 @@ simulated rear camera, so rear_detection doesn't run.
 Arguments:
     use_sim (default false): run in Gazebo instead of on the hardware, and
         use the simulation clock in every node.
-    world (default obstacles.sdf), headless (default false), odometry
-        (default encoders; lidar to run without encoders): passed to
+    world (default obstacles.sdf), headless (default false): passed to
         sim.launch.py with use_sim:=true.
     use_front_camera (default true): start the front RealSense driver.
         Set to false when developing without the camera plugged in.
@@ -73,7 +72,6 @@ def generate_launch_description():
         launch_arguments={
             'world': LaunchConfiguration('world'),
             'headless': LaunchConfiguration('headless'),
-            'odometry': LaunchConfiguration('odometry'),
         }.items(),
         condition=IfCondition(use_sim),
     )
@@ -130,9 +128,6 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'headless', default_value='false',
             description='Run Gazebo without its GUI (use_sim:=true only)'),
-        DeclareLaunchArgument(
-            'odometry', default_value='encoders', choices=['encoders', 'lidar'],
-            description='Speed source for the EKF: encoders or lidar (use_sim:=true only)'),
         DeclareLaunchArgument(
             'use_front_camera', default_value='true',
             description='Start the front RealSense driver (false if no camera attached)'),

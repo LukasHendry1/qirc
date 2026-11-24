@@ -69,12 +69,11 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 ## Phase 3: Low-level control (motor controller + `qirc_pico_bridge`)
 
 - [ ] `now` Decide on the motor controller (Raspberry Pi Pico RP2040 recommended); write the pin map
-- [ ] `now` Define the serial protocol (track speeds, stepper/arm commands, encoder counts, status)
+- [ ] `now` Define the serial protocol (track speeds, stepper/arm commands, arm encoder counts, status)
 - [ ] `now` Firmware skeleton in `firmware/` (PlatformIO), with a **watchdog** that stops all motors if commands stop arriving
 - [ ] `now` CI job that compiles the firmware
 - [ ] `now` `qirc_pico_bridge` ROS 2 node: `/cmd_vel` → left/right track speeds → serial; includes a fake-controller mode for testing without hardware
-- [ ] `hw` Drive motors without speed feedback (MD10C ×2) → encoders → per-track speed PID
-- [ ] `hw` **Track odometry**: publish `/odom` from `qirc_pico_bridge`; the EKF, not the bridge, publishes the `odom → base_link` transform (see [Tracks and odometry](#tracks-and-odometry))
+- [ ] `hw` Drive motors (MD10C ×2), open loop: no encoders, so track speeds are set by PWM. Speed is corrected at the robot level, from the LiDAR odometry and the EKF (see [Tracks and odometry](#tracks-and-odometry))
 - [ ] `hw` Stepper control (DRV8825 ×2) and arm motors (limit switch homing deferred, see [design decisions](architecture/messages.md#design-decisions))
 - [ ] `hw` Status LEDs and headlights
 - [ ] `robot` E-stop end to end: motors cut in hardware, software detects it and reports it
@@ -85,7 +84,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Phase 4: Localization and mapping
 
-- [x] `now` **Sensor fusion**: `robot_localization` EKF combining track odometry and the D435i IMU (develop in simulation)
+- [x] `now` **Sensor fusion**: `robot_localization` EKF combining LiDAR odometry (`laser_odometry`, no drive encoders) and the D435i IMU (develop in simulation)
 - [x] `now` **Mapping**: `slam_toolbox` in simulation
 - [x] `now` **Map save and load**: save the map and localize in it with `slam_toolbox`, in simulation
 - [x] `now` Decide whether `mapping_node` / `localization_node` stay custom or become wrappers or config around existing tools (config: both modes run straight from `slam_toolbox`)
@@ -176,7 +175,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 ## Hardware and electrical (supporting tasks)
 
 - [x] Drive motors: E-S Motor 36PG-555K-24120-100, 24 V, 120 rpm ([datasheet](Electrical/Datasheets/drive_motor_datasheet.pdf)), on Cytron MD10C drivers ([manual](Electrical/Datasheets/drive_motor_driver.pdf))
-- [ ] Drive motor encoders: the 36PG has none, and track odometry (`/odom`) needs them
+- [x] Drive motor encoders: none. Odometry comes from the LiDAR (`laser_odometry`)
 - [x] Arm motors: Yahboom MD520Z19 (12 V, Hall encoders) on a 12 V rail ([datasheet](Electrical/Datasheets/Yahboom_MD520_encoder_motor.md)), driven by a SparkFun TB6612FNG ([datasheet](Electrical/Datasheets/SparkFun_TB6612FNG_motor_driver.md))
 - [ ] Arm position feedback beyond the motor encoders (limit switches or potentiometers), if needed
 - [ ] Choose the battery: 8S LiFePO4 (25.6 V nominal), BMS rated 40 A continuous or more; capacity from the run time needed ([PWR-02](Electrical/calculations/battery_capacity.pdf): 10 Ah gives ~1.1 h of driving, ~2.3 h of mixed use)
@@ -189,7 +188,7 @@ Tasks are grouped into phases, roughly in dependency order, but many phases can 
 
 ## Critical path
 
-**Simulation (Phase 0)** → **motor controller + odometry (Phase 3)** → **localization (Phase 4)** → **navigation (Phase 5)** → **full dispense cycle (Phases 7–8)**
+**Simulation (Phase 0)** → **motor controller (Phase 3)** → **localization (Phase 4)** → **navigation (Phase 5)** → **full dispense cycle (Phases 7–8)**
 
 Everything else can run alongside this chain. Simulation matters most right now because it lets software progress while hardware is still arriving.
 
@@ -207,7 +206,7 @@ URDF has no native track model. Two approaches, used in this order:
 ### Tracks and odometry
 
 Tracks are kinematically the same as differential drive (left/right speeds → forward speed + turn rate), so `/cmd_vel` and the controllers work the same way. But tracks **skid when turning**:
-- Turning rate computed from the tracks alone is unreliable. In the odometry, the effective track separation needs calibrating, and is usually wider than the physical spacing.
-- **Fusing the D435i IMU** (gyro) for heading is essential, not optional.
-- LiDAR scan matching (`slam_toolbox`) corrects the remaining drift.
+- There are **no drive encoders**, so odometry comes from **LiDAR scan matching** (`laser_odometry`), which doesn't skid. It's weak in long bare hallways, where every scan looks the same.
+- **Fusing the D435i IMU** (gyro) carries the heading between scans and through poor matches.
+- `slam_toolbox` corrects the remaining drift against the map.
 - The MPC should use a skid-steer model, or include slip in its model.

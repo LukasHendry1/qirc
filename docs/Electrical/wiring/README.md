@@ -11,6 +11,7 @@ Wiring diagrams written as [WireViz](https://github.com/wireviz/WireViz) YAML. T
 
 ## Design decisions
 
+- **No drive motor encoders.** The E-S Motor 36PG has none, and none are added: odometry comes from the LiDAR (`laser_odometry`), and the drive motors run open loop.
 - **E-stop cuts the motor rail only.** The Jetson, Pico and LEDs stay powered, so the robot can log the stop and show it on the status LEDs and web app.
 - **24 V system:** 8S LiFePO4 battery (25.6 V nominal, 10 Ah) and 24 V drive motors. The DRV8825s and headlights run from the same rail.
 - **12 V arm rail:** the arm motors (Yahboom MD520Z19, 12 V) and their TB6612FNG driver (13.5 V max) run from a 12 V buck converter. It's fed from the motor rail after the E-stop, so the E-stop also stops the arm. It's sized at 6 A or more, for both arm motors stalled (2 × 3 A).
@@ -25,7 +26,6 @@ Wiring diagrams written as [WireViz](https://github.com/wireviz/WireViz) YAML. T
 
 ## TBD
 
-- **Drive motor encoders:** the E-S Motor 36PG has none. Odometry needs them.
 - **Drive current:** motor stall (21 A) is above the MD10C's 13 A continuous rating (30 A peak), so firmware must limit current or detect stalls.
 - **30 V margin:** the MD10C is rated to 30 V and a full 8S LiFePO4 is 29.2 V. Don't drive while charging.
 - **Arm driver current:** the TB6612FNG is rated 1.0 A per channel continuous, but an arm motor stalls at 3 A. Firmware must cap the PWM duty and cut a channel when its encoder stops while driven ([datasheet](../Datasheets/SparkFun_TB6612FNG_motor_driver.md)).
