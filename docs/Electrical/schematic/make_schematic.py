@@ -397,7 +397,9 @@ def build():
     s.wire(('SW1', '2'), ('K1', 'IN'), gauge=wire12, gauge_at=(51, 11.75))
     s.label('+BAT_SW', 39.5, 12)
     # E-stop in series with the contactor coil; D1 across the coil.
-    s.wire((44, 12), (44, 20), ('ES1', '1'), gauge=wire20, gauge_at=(44.3, 16.5))
+    s.wire((44, 12), (44, 20), ('ES1', '1'), gauge=wire18, gauge_at=(44.3, 16.5))
+    # +BAT_SW down to the always-on converters (DC19, DC5), before K1.
+    s.wire((44, 20), (44, 26), (7, 26), (7, 67), gauge=wire18, gauge_at=(25, 25.75))
     s.wire(('ES1', '2'), (50, 20), (50, 14), ('K1', 'COIL+'))
     s.wire(('D1', 'A'), (56, 18), (56, 15), ('K1', 'COIL-'))
     s.gnd(56, 18)
@@ -481,7 +483,6 @@ def build():
                                ['USB1', 'USB2', 'USB3', 'USB4'], 10), 33, y,
           value='Jetson Orin Nano dev kit')
     s.wire((7, y), ('DC19', 'IN+'), gauge=wire18, gauge_at=(13.5, y - 0.25))
-    s.label('+BAT_SW', 7, y)
     s.wire(('DC19', 'IN-'), (14, y + 1))
     s.gnd(14, y + 1)
     s.wire(('DC19', 'OUT+'), ('JETSON', 'DC_IN+'), gauge=wire16)
@@ -508,7 +509,6 @@ def build():
     s.add('LEDS', box_symbol('LED_strip', ['5V', 'GND'], [], 10), 33, y,
           value='Seeed Grove WS2813 strip')
     s.wire((7, y), ('DC5', 'IN+'), gauge=wire20, gauge_at=(13.5, y - 0.25))
-    s.label('+BAT_SW', 7, y)
     s.wire(('DC5', 'IN-'), (14, y + 1))
     s.gnd(14, y + 1)
     s.wire(('DC5', 'OUT+'), ('LEDS', '5V'), gauge=wire20)
