@@ -36,12 +36,12 @@ connectors:
     type: Drive fuse left + holder
     subtype: 15 A, 32 V DC (ATO blade, time delay)
     pinlabels: [IN, OUT]
-    notes: Littelfuse 0287015.PXCN in holder 0FHA0002ZXJ. Protects MD10C left; passes starts and short peaks, blows on a held stall (21 A)
+    notes: Littelfuse 0287015.PXCN in holder 0FHA0002ZXJ. On the left motor lead (MA to M+), so it carries the motor current. Protects MD10C left; passes starts and short peaks, blows on a held stall (21 A)
   F_MD_R:
     type: Drive fuse right + holder
     subtype: 15 A, 32 V DC (ATO blade, time delay)
     pinlabels: [IN, OUT]
-    notes: Littelfuse 0287015.PXCN in holder 0FHA0002ZXJ. Protects MD10C right; passes starts and short peaks, blows on a held stall (21 A)
+    notes: Littelfuse 0287015.PXCN in holder 0FHA0002ZXJ. On the right motor lead (MA to M+), so it carries the motor current. Protects MD10C right; passes starts and short peaks, blows on a held stall (21 A)
   SW1:
     type: Main power switch
     subtype: XT90-S anti-spark loop key, rated 40 A DC or more
@@ -214,7 +214,7 @@ cables:
     colors: [BK]
     gauge: 20 AWG
 
-  # Feeds from the buses (only the drive feeds have their own fuses)
+  # Feeds from the buses (no branch fuses; the drive fuses are on the motor leads)
   W_F_MD_L:
     wirecount: 1
     colors: [RD]
@@ -381,29 +381,36 @@ connections:
 
   # Drive motors
   - - BUS_MOT: [2]
-    - W_F_MD_L: [1]
-    - F_MD_L: [1]
-  - - F_MD_L: [2]
     - W_MD_L: [1]
     - MD_L: [1]
   - - BUS_GND: [2]
     - W_MD_L: [2]
     - MD_L: [2]
-  - - MD_L: [3, 4]
-    - W_M_L: [1, 2]
-    - M_L: [1, 2]
+  # 15 A fuse on the motor lead, between the driver and the motor
+  - - MD_L: [3]
+    - W_F_MD_L: [1]
+    - F_MD_L: [1]
+  - - F_MD_L: [2]
+    - W_M_L: [1]
+    - M_L: [1]
+  - - MD_L: [4]
+    - W_M_L: [2]
+    - M_L: [2]
   - - BUS_MOT: [3]
-    - W_F_MD_R: [1]
-    - F_MD_R: [1]
-  - - F_MD_R: [2]
     - W_MD_R: [1]
     - MD_R: [1]
   - - BUS_GND: [3]
     - W_MD_R: [2]
     - MD_R: [2]
-  - - MD_R: [3, 4]
-    - W_M_R: [1, 2]
-    - M_R: [1, 2]
+  - - MD_R: [3]
+    - W_F_MD_R: [1]
+    - F_MD_R: [1]
+  - - F_MD_R: [2]
+    - W_M_R: [1]
+    - M_R: [1]
+  - - MD_R: [4]
+    - W_M_R: [2]
+    - M_R: [2]
 
   # Arm motors: 12 V buck after the E-stop, then one dual-channel driver
   - - BUS_MOT: [4]

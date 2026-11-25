@@ -410,19 +410,21 @@ def build():
 
     for side, y in (('L', 12), ('R', 22)):
         side_name = 'left' if side == 'L' else 'right'
-        s.add(f'F_M{side}', two_pin('Fuse_15A', FUSE_GRAPHICS), 83, y, ref_prefix='F',
-              notes='0287015.PXCN', notes_at=(-2.5, 0.9))
-        s.text('15 A ATO', 83, y - 0.5, size=1.0, justify='bottom')
         s.add(f'MD_{side}', box_symbol('MD10C', ['POWER+', 'POWER-'], ['MA', 'MB'], 11),
               94, y, value=f'Cytron MD10C ({side_name})')
+        # The 15 A fuse is on the motor lead, so it carries the motor current
+        # the driver delivers.
+        s.add(f'F_M{side}', two_pin('Fuse_15A', FUSE_GRAPHICS), 109, y, ref_prefix='F')
+        s.text('15 A 0287015.PXCN', 109, y - 0.5, size=1.0, justify='bottom')
         s.add(f'M_{side}', box_symbol('Drive_motor', ['M+', 'M-'], [], 9), 114, y,
               value='E-S Motor 36PG-555K')
-        s.wire((trunk, y), (f'F_M{side}', '1'), gauge=wire14)
-        s.wire((f'F_M{side}', '2'), (f'MD_{side}', 'POWER+'), gauge=wire14)
+        s.wire((trunk, y), (f'MD_{side}', 'POWER+'), gauge=wire14)
         s.wire((f'MD_{side}', 'POWER-'), (91, y + 1))
         s.gnd(91, y + 1)
-        s.wire((f'MD_{side}', 'MA'), (f'M_{side}', 'M+'), gauge=wire14)
+        s.wire((f'MD_{side}', 'MA'), (f'F_M{side}', '1'))
+        s.wire((f'F_M{side}', '2'), (f'M_{side}', 'M+'))
         s.wire((f'MD_{side}', 'MB'), (f'M_{side}', 'M-'))
+        s.text(wire14, 109, y + 1.25, size=1.0, justify='top', colour=(0, 0, 132))
 
     # 12 V arm rail and the arm driver.
     y = 32
@@ -529,11 +531,10 @@ NETS = [
     {('F_BAT', '2'), ('SW1', '1')},
     {('SW1', '2'), ('K1', 'IN'), ('ES1', '1'), ('DC19', 'IN+'), ('DC5', 'IN+')},
     {('ES1', '2'), ('K1', 'COIL+'), ('D1', 'K')},
-    {('K1', 'OUT'), ('F_ML', '1'), ('F_MR', '1'), ('DC12', 'IN+'), ('DRV_1', 'VMOT'),
+    {('K1', 'OUT'), ('MD_L', 'POWER+'), ('MD_R', 'POWER+'), ('DC12', 'IN+'), ('DRV_1', 'VMOT'),
      ('DRV_2', 'VMOT'), ('MOSFET', 'VIN+')},
-    {('F_ML', '2'), ('MD_L', 'POWER+')}, {('F_MR', '2'), ('MD_R', 'POWER+')},
-    {('MD_L', 'MA'), ('M_L', 'M+')}, {('MD_L', 'MB'), ('M_L', 'M-')},
-    {('MD_R', 'MA'), ('M_R', 'M+')}, {('MD_R', 'MB'), ('M_R', 'M-')},
+    {('MD_L', 'MA'), ('F_ML', '1')}, {('F_ML', '2'), ('M_L', 'M+')}, {('MD_L', 'MB'), ('M_L', 'M-')},
+    {('MD_R', 'MA'), ('F_MR', '1')}, {('F_MR', '2'), ('M_R', 'M+')}, {('MD_R', 'MB'), ('M_R', 'M-')},
     {('DC12', 'OUT+'), ('AD', 'VM')},
     {('AD', 'AO1'), ('AM_1', 'M+')}, {('AD', 'AO2'), ('AM_1', 'M-')},
     {('AD', 'BO1'), ('AM_2', 'M+')}, {('AD', 'BO2'), ('AM_2', 'M-')},

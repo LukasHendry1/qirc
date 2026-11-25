@@ -21,7 +21,7 @@ Wiring diagrams written as [WireViz](https://github.com/wireviz/WireViz) YAML. T
 - **The Jetson has its own buck-boost converter** with a steady 19 V output, so motor current spikes that dip the battery voltage don't reboot it.
 - **Fuses: three in total.**
   - **40 A main fuse** at the battery (Littelfuse 0895040.Z, JCASE, in an FHJC1001G holder), sized for both drive motors stalling at once (2 x 21 A) on a battery whose BMS allows 40 A or more.
-  - **15 A fuse on each drive driver** (Littelfuse 0287015.PXCN, a standard ATO blade, which has a time delay; holder 0FHA0002ZXJ) for the MD10C (13 A continuous, 30 A for 10 s). It passes starts and short peaks but blows on a held stall (21 A).
+  - **15 A fuse on each drive motor lead**, between the MD10C's MA output and the motor (Littelfuse 0287015.PXCN, a standard ATO blade, which has a time delay; holder 0FHA0002ZXJ). It protects the MD10C (13 A continuous, 30 A for 10 s): it passes starts and short peaks but blows on a held stall (21 A). On the motor side it carries the motor current itself, which with PWM is higher than the driver's supply current. A short inside a driver or on its supply wire is left to the 40 A main fuse.
   - **No other branch fuses.** The converters, steppers, arm and headlights are protected by the main fuse only. Their 18–22 AWG wires are not protected against faults below 40 A, so keep those runs short and well secured.
   - All fuses must be rated **32 V DC or more**, with a **breaking capacity of 1000 A or more** (ATO/MAXI blade or MIDI). Glass 5×20 mm fuses rated for 250 V AC break only about 35 A and must not be used on the battery.
 - **All grounds meet at one common ground bus.**
