@@ -55,7 +55,6 @@ connectors:
     type: Contactor (cuts the motor rail)
     subtype: Altran ALEV50-C, 50 A DC contacts, 24 V coil, 6 W
     pinlabels: [IN, OUT, COIL+, COIL-]
-    notes: 1N4007 flyback diode across the coil (cathode to COIL+)
 
   # --- Distribution ------------------------------------------------------
   BUS_24V:

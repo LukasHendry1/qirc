@@ -14,7 +14,7 @@ Wiring diagrams written as [WireViz](https://github.com/wireviz/WireViz) YAML. T
 
 - **No drive motor encoders.** The E-S Motor 36PG has none, and none are added: odometry comes from the LiDAR (`laser_odometry`), and the drive motors run open loop.
 - **E-stop cuts the motor rail only.** The Jetson, Pico and LEDs stay powered, so the robot can log the stop and show it on the status LEDs and web app.
-- **The E-stop switches a contactor, not the motor current.** The E-stop (SW-EMERG-LED-24V, latching, normally closed) is in series with the coil of a 50 A DC contactor (K1, Altran ALEV50-C, 24 V coil, 6 W). Pressing it opens K1, which cuts the motor rail. The E-stop only carries the coil current (0.25 A). A 1N4007 flyback diode across the coil absorbs its turn-off spike.
+- **The E-stop switches a contactor, not the motor current.** The E-stop (SW-EMERG-LED-24V, latching, normally closed) is in series with the coil of a 50 A DC contactor (K1, Altran ALEV50-C, 24 V coil, 6 W). Pressing it opens K1, which cuts the motor rail. The E-stop only carries the coil current (0.25 A).
 - **Main switch: XT90-S anti-spark loop key**, which is cheaper than a 40 A DC switch.
 - **24 V system:** 8S LiFePO4 battery (25.6 V nominal, 10 Ah) and 24 V drive motors. The DRV8825s and headlights run from the same rail.
 - **12 V arm rail:** the arm motors (Yahboom MD520Z19, 12 V) and their TB6612FNG driver (13.5 V max) run from a 12 V buck converter. It's fed from the motor rail after the E-stop, so the E-stop also stops the arm. It's sized at 6 A or more, for both arm motors stalled (2 × 3 A).

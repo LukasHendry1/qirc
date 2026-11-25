@@ -6,7 +6,7 @@
 
 ![Power schematic](qirc_power.svg)
 
-- **Top row:** battery → 40 A fuse (F_BAT) → loop key (SW1) → `+BAT_SW`. The contactor K1 switches `+BAT_SW` onto the motor rail `+24V_MOT`. The E-stop (ES1, normally closed) is in series with K1's coil, so pressing it opens K1. D1 is the coil's flyback diode.
+- **Top row:** battery → 40 A fuse (F_BAT) → loop key (SW1) → `+BAT_SW`. The contactor K1 switches `+BAT_SW` onto the motor rail `+24V_MOT`. The E-stop (ES1, normally closed) is in series with K1's coil, so pressing it opens K1.
 - **Cut by the E-stop:** everything on `+24V_MOT`: both drive drivers (each with a 15 A fuse on its motor lead), the 12 V arm rail and arm driver, both dispenser steppers, and the headlights.
 - **Always on:** the Jetson (with its USB devices) and the status LEDs, fed from `+BAT_SW`, so the robot can report a stop.
 

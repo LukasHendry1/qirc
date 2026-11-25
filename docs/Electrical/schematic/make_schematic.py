@@ -386,7 +386,6 @@ def build():
           59, 12, value='Altran ALEV50-C, 50 A, 24 V coil', ref_prefix='K')
     s.add('ES1', two_pin('E-stop', ESTOP_GRAPHICS, ref_at=(0, 2.0)), 47, 20, ref_prefix='SW',
           notes='E-stop (NC)', notes_at=(-2.2, 1.0))
-    s.add('D1', diode_symbol('1N4007'), 53, 16, ref_prefix='D')
 
     s.wire(('BAT', 'B+'), ('F_BAT', '1'), gauge=wire12)
     s.wire(('BAT', 'B-'), (19, 14))
@@ -395,13 +394,13 @@ def build():
     s.wire(('F_BAT', '2'), ('SW1', '1'), gauge=wire12)
     s.wire(('SW1', '2'), ('K1', 'IN'), gauge=wire12, gauge_at=(51, 11.75))
     s.label('+BAT_SW', 39.5, 12)
-    # E-stop in series with the contactor coil; D1 across the coil.
+    # E-stop in series with the contactor coil.
     s.wire((44, 12), (44, 20), ('ES1', '1'), gauge=wire18, gauge_at=(44.3, 16.5))
     # +BAT_SW down to the always-on converters (DC19, DC5), before K1.
     s.wire((44, 20), (44, 24), (7, 24), (7, 60), gauge=wire18, gauge_at=(25, 23.75))
     s.wire(('ES1', '2'), (50, 20), (50, 14), ('K1', 'COIL+'))
-    s.wire(('D1', 'A'), (56, 18), (56, 15), ('K1', 'COIL-'))
-    s.gnd(56, 18)
+    s.wire(('K1', 'COIL-'), (56, 15), (56, 17))
+    s.gnd(56, 17)
     trunk = 77
     s.wire(('K1', 'OUT'), (trunk, 12), gauge=wire12, gauge_at=(73.5, 12.25), below=True)
     s.label('+24V_MOT', 71, 12)
@@ -521,7 +520,7 @@ def build():
 
 # The intended nets: each is a set of (ref, pin name). The drawn schematic
 # must give exactly these.
-GROUND = {('BAT', 'B-'), ('K1', 'COIL-'), ('D1', 'A'), ('MD_L', 'POWER-'), ('MD_R', 'POWER-'),
+GROUND = {('BAT', 'B-'), ('K1', 'COIL-'), ('MD_L', 'POWER-'), ('MD_R', 'POWER-'),
           ('DC12', 'IN-'), ('DC12', 'OUT-'), ('AD', 'GND'), ('DRV_1', 'GND'), ('DRV_2', 'GND'),
           ('MOSFET', 'VIN-'), ('DC19', 'IN-'), ('DC19', 'OUT-'), ('JETSON', 'DC_IN-'),
           ('DC5', 'IN-'), ('DC5', 'OUT-'), ('LEDS', 'GND')}
@@ -530,7 +529,7 @@ NETS = [
     {('BAT', 'B+'), ('F_BAT', '1')},
     {('F_BAT', '2'), ('SW1', '1')},
     {('SW1', '2'), ('K1', 'IN'), ('ES1', '1'), ('DC19', 'IN+'), ('DC5', 'IN+')},
-    {('ES1', '2'), ('K1', 'COIL+'), ('D1', 'K')},
+    {('ES1', '2'), ('K1', 'COIL+')},
     {('K1', 'OUT'), ('MD_L', 'POWER+'), ('MD_R', 'POWER+'), ('DC12', 'IN+'), ('DRV_1', 'VMOT'),
      ('DRV_2', 'VMOT'), ('MOSFET', 'VIN+')},
     {('MD_L', 'MA'), ('F_ML', '1')}, {('F_ML', '2'), ('M_L', 'M+')}, {('MD_L', 'MB'), ('M_L', 'M-')},
