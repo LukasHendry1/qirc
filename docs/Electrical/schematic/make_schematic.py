@@ -377,20 +377,16 @@ def build():
 
     # ---- Source, main switch, E-stop and contactor (top left) ----
     s.add('BAT', box_symbol('Battery', [], ['B+', None, 'B-'], 9), 7, 12,
-          value='8S LiFePO4, 25.6 V, 10 Ah',
-          notes='20-29.2 V (256 Wh)\nXT60/XT90, BMS >= 40 A cont.\nnot bought yet')
+          value='8S LiFePO4, 25.6 V')
     s.add('F_BAT', two_pin('Fuse_40A', FUSE_GRAPHICS), 24, 12, ref_prefix='F',
-          notes='40 A, 58 V DC\nLittelfuse 0895040.Z (JCASE)\nholder FHJC1001G',
-          notes_at=(-2.5, 1.0))
+          notes='0895040.Z', notes_at=(-2.2, 1.0))
     s.text('40 A', 24, 11.5, size=1.0, justify='bottom')
     s.add('SW1', two_pin('Loop_key', SWITCH_GRAPHICS), 37, 12, ref_prefix='SW',
-          notes='XT90-S anti-spark\nloop key (main switch)', notes_at=(-2.5, 1.0))
+          notes='XT90-S loop key', notes_at=(-3, 1.0))
     s.add('K1', box_symbol('Contactor', ['IN', None, 'COIL+', 'COIL-'], ['OUT'], 10),
-          59, 12, value='Altran ALEV50-C', ref_prefix='K',
-          notes='DC contactor, 50 A contacts\n24 V coil, 6 W (0.25 A)\nopens when the E-stop is pressed')
+          59, 12, value='Altran ALEV50-C, 50 A, 24 V coil', ref_prefix='K')
     s.add('ES1', two_pin('E-stop', ESTOP_GRAPHICS, ref_at=(0, 2.0)), 47, 20, ref_prefix='SW',
-          notes='E-stop, latching, NC\nSW-EMERG-LED-24V\nswitches only the coil current',
-          notes_at=(-3, 1.0))
+          notes='E-stop (NC)', notes_at=(-2.2, 1.0))
     s.add('D1', diode_symbol('1N4007'), 53, 16, ref_prefix='D')
 
     s.wire(('BAT', 'B+'), ('F_BAT', '1'), gauge=wire12)
@@ -410,7 +406,6 @@ def build():
     s.label('+24V_MOT', 71, 12)
 
     # ---- Actuators, cut by the E-stop (right) ----
-    s.zone(75.5, 5, 158, 93, 'CUT BY THE E-STOP: powered through K1')
 
     for side, y in (('L', 12), ('R', 25)):
         side_name = 'left' if side == 'L' else 'right'
@@ -418,11 +413,9 @@ def build():
               notes='0287015.PXCN', notes_at=(-2.5, 0.9))
         s.text('15 A ATO', 83, y - 0.5, size=1.0, justify='bottom')
         s.add(f'MD_{side}', box_symbol('MD10C', ['POWER+', 'POWER-'], ['MA', 'MB'], 11),
-              94, y, value=f'Cytron MD10C ({side_name})',
-              notes='5-30 V, 13 A cont., 30 A peak\nstall (21 A) > 13 A: limit in firmware')
+              94, y, value=f'Cytron MD10C ({side_name})')
         s.add(f'M_{side}', box_symbol('Drive_motor', ['M+', 'M-'], [], 9), 114, y,
-              value='E-S Motor 36PG-555K-24120-100',
-              notes='24 V, 120 RPM, 2.6 A rated, 21 A stall\nno encoder (odometry from the LiDAR)')
+              value='E-S Motor 36PG-555K')
         s.wire((trunk, y), (f'F_M{side}', '1'), gauge=wire14)
         s.wire((f'F_M{side}', '2'), (f'MD_{side}', 'POWER+'), gauge=wire14)
         s.wire((f'MD_{side}', 'POWER-'), (91, y + 1))
@@ -433,16 +426,13 @@ def build():
     # 12 V arm rail and the arm driver.
     y = 38
     s.add('DC12', box_symbol('Buck_12V', ['IN+', 'IN-'], ['OUT+', 'OUT-'], 5), 82, y,
-          value='Buck 24 -> 12 V', ref_prefix='PS', notes='>= 6 A (both arm\nmotors stalled)')
+          value='Buck 24 -> 12 V, 6 A', ref_prefix='PS')
     s.add('AD', box_symbol('TB6612FNG', ['VM', 'GND'],
                            ['AO1', 'AO2', None, None, None, None, 'BO1', 'BO2'], 11),
-          94, y, value='SparkFun TB6612FNG (arm)',
-          notes='VM 4.5-13.5 V, 1.0 A/ch cont., 3.2 A peak\n'
-                'logic 3.3 V and PWM from the Pico\nfirmware caps duty, detects stalls')
+          94, y, value='SparkFun TB6612FNG (arm)')
     for i, n in enumerate(('1', '2')):
         s.add(f'AM_{n}', box_symbol('Arm_motor', ['M+', 'M-'], [], 9), 114, y + 6 * i,
-              value='Yahboom MD520Z19', notes_at=(10.5, -0.6),
-              notes='12 V, 0.3 A rated, 3 A stall\nHall encoder -> Pico')
+              value='Yahboom MD520Z19')
     s.wire((trunk, y), ('DC12', 'IN+'), gauge=wire18)
     s.wire(('DC12', 'IN-'), (79, y + 1))
     s.gnd(79, y + 1)
@@ -459,11 +449,9 @@ def build():
     for i, y in enumerate((56, 70)):
         n = str(i + 1)
         s.add(f'DRV_{n}', box_symbol('DRV8825', ['VMOT', 'GND'], ['A1', 'A2', 'B1', 'B2'], 11),
-              94, y, value=f'TI DRV8825 (dispenser {n})',
-              notes='100 uF 50 V cap across VMOT-GND\ncurrent limit 1.2-1.5 A')
+              94, y, value=f'TI DRV8825 (dispenser {n})')
         s.add(f'ST_{n}', box_symbol('NEMA17', ['A+', 'A-', 'B+', 'B-'], [], 9), 114, y,
-              value='NEMA 17, 17HS19-2004S1',
-              notes='2 A per phase; check the coil\npairs on the datasheet')
+              value='NEMA 17 stepper')
         s.wire((trunk, y), (f'DRV_{n}', 'VMOT'), gauge=wire18)
         s.wire((f'DRV_{n}', 'GND'), (91, y + 1))
         s.gnd(91, y + 1)
@@ -475,10 +463,9 @@ def build():
     # Headlights.
     y = 84
     s.add('MOSFET', box_symbol('MOSFET_module', ['VIN+', 'VIN-'], ['OUT+', 'OUT-'], 11), 94, y,
-          value='Logic-level MOSFET module', ref_prefix='Q',
-          notes='switches the headlight negative\nPWM gate from the Pico (signal diagram)')
+          value='MOSFET module', ref_prefix='Q')
     s.add('HEAD', box_symbol('Headlights', ['+', '-'], [], 9), 114, y,
-          value='goBILDA 3118-0102-0002', notes='headlights, 400 lm, 5-30 V, XT30')
+          value='goBILDA headlights')
     s.wire((trunk, 12), (trunk, y), ('MOSFET', 'VIN+'), gauge=wire18,
            gauge_at=(85, y - 0.25))
     s.wire(('MOSFET', 'VIN-'), (91, y + 1))
@@ -487,15 +474,12 @@ def build():
     s.wire(('MOSFET', 'OUT-'), ('HEAD', '-'))
 
     # ---- Always on: computer, sensors, status LEDs (left) ----
-    s.zone(4, 28, 71, 93, 'ALWAYS ON: not cut by the E-stop')
     y = 36
     s.add('DC19', box_symbol('Buck_boost_19V', ['IN+', 'IN-'], ['OUT+', 'OUT-'], 8), 17, y,
-          value='Buck-boost -> 19 V', ref_prefix='PS',
-          notes='20-30 V in, >= 40 W\nholds 19 V when the\nmotors dip the battery')
+          value='Buck-boost -> 19 V', ref_prefix='PS')
     s.add('JETSON', box_symbol('Jetson', ['DC_IN+', 'DC_IN-'],
                                ['USB1', 'USB2', 'USB3', 'USB4'], 10), 33, y,
-          value='Jetson Orin Nano dev kit',
-          notes='DC barrel jack, 19 V\nUSB-A ports power\nthe USB devices')
+          value='Jetson Orin Nano dev kit')
     s.wire((7, y), ('DC19', 'IN+'), gauge=wire18, gauge_at=(13.5, y - 0.25))
     s.label('+BAT_SW', 7, y)
     s.wire(('DC19', 'IN-'), (14, y + 1))
@@ -513,17 +497,16 @@ def build():
     ]
     for i, (ref, pin, value, note, dy, xr) in enumerate(devices):
         s.add(ref, box_symbol(ref.title() + '_dev', [pin], [], 11), 54, dy, value=value,
-              notes=note, ref_prefix='J')
+              ref_prefix='J')
         port = ('JETSON', f'USB{i + 1}')
         _, sy = s.pin(*port)
         s.wire(port, (xr, sy), (xr, dy), (ref, pin))
 
     y = 67
     s.add('DC5', box_symbol('Buck_5V', ['IN+', 'IN-'], ['OUT+', 'OUT-'], 8), 17, y,
-          value='Buck 24 -> 5 V', ref_prefix='PS', notes='>= 3 A')
+          value='Buck 24 -> 5 V, 3 A', ref_prefix='PS')
     s.add('LEDS', box_symbol('LED_strip', ['5V', 'GND'], [], 10), 33, y,
-          value='Seeed Grove WS2813 strip',
-          notes='30 LEDs, 5 V, 1.8 A max\ndata line from the Pico\n(signal diagram)')
+          value='Seeed Grove WS2813 strip')
     s.wire((7, y), ('DC5', 'IN+'), gauge=wire20, gauge_at=(13.5, y - 0.25))
     s.label('+BAT_SW', 7, y)
     s.wire(('DC5', 'IN-'), (14, y + 1))
@@ -532,18 +515,6 @@ def build():
     s.wire(('DC5', 'OUT-'), ('LEDS', 'GND'))
     s.gnd(29, y + 1)
 
-    s.text('Notes\n'
-           '1. Every GND symbol is the one common ground bus at the battery negative.\n'
-           '2. Three fuses only: F_BAT at the battery, F_ML and F_MR on the drive drivers.\n'
-           '   Everything else is protected by F_BAT, so keep its 18-22 AWG runs short.\n'
-           '   15 A fuses: Littelfuse 0287015.PXCN (ATO) in holder 0FHA0002ZXJ.\n'
-           '3. The E-stop opens the K1 coil circuit, and K1 cuts +24V_MOT: drive, arm,\n'
-           '   dispenser and headlights. The Jetson, Pico, sensors and LEDs stay on to\n'
-           '   report the stop.\n'
-           '4. D1 (1N4007) across the K1 coil absorbs the coil\'s turn-off spike.\n'
-           '5. Labels with the same name (+BAT_SW) are the same net: join with terminal blocks.\n'
-           '6. Signal wiring (Pico pins, encoders, LED data, MOSFET gate) is a separate diagram.',
-           6, 77, size=1.27)
     return s
 
 
