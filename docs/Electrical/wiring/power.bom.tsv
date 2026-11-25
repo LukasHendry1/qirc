@@ -1,43 +1,45 @@
 Id	Description	Qty	Unit	Designators
-1	Cable, 1 x 12 AWG	0	m	W_ES_IN, W_ES_OUT, W_F, W_SW
+1	Cable, 1 x 12 AWG	0	m	W_F, W_K1_IN, W_K1_OUT, W_SW
 2	Cable, 1 x 14 AWG	0	m	W_F_MD_L, W_F_MD_R
-3	Cable, 2 x 12 AWG	0	m	W_BAT
-4	Cable, 2 x 14 AWG	0	m	W_MD_L, W_MD_R, W_M_L, W_M_R
-5	Cable, 2 x 16 AWG	0	m	W_JETSON
-6	Cable, 2 x 18 AWG	0	m	W_AD, W_DC12_IN, W_DC19_IN, W_DRV_1, W_DRV_2, W_MOSFET
-7	Cable, 2 x 20 AWG	0	m	W_AM_1, W_AM_2, W_DC5_IN, W_HEAD, W_LEDS
-8	Cable, 4 x 22 AWG	0	m	W_ST_1, W_ST_2
-9	Connector, Arm motor 1, Yahboom MD520Z19 (JGB37-520), 12 V, 550 RPM, 0.3 A rated, 3 A stall, 2 pins	1		AM_1
-10	Connector, Arm motor 2, Yahboom MD520Z19 (JGB37-520), 12 V, 550 RPM, 0.3 A rated, 3 A stall, 2 pins	1		AM_2
-11	Connector, Battery, 8S LiFePO4, 25.6 V nominal (20-29.2 V), 10 Ah (256 Wh), 2 pins	1		BAT
-12	Connector, Bus bar / terminal block, Common ground, 9 pins	1		BUS_GND
-13	Connector, Bus bar / terminal block, Motor rail 24 V (after E-stop), 7 pins	1		BUS_MOT
-14	Connector, Bus bar / terminal block, Unswitched 24 V (after main switch), 4 pins	1		BUS_24V
-15	Connector, Cytron MD10C (drive left), 5-30 V, 13 A continuous, 30 A peak, 4 pins	1		MD_L
-16	Connector, Cytron MD10C (drive right), 5-30 V, 13 A continuous, 30 A peak, 4 pins	1		MD_R
-17	Connector, DC-DC buck (arm rail), 20-30 V in, 12 V out, 6 A min, 4 pins	1		DC12
-18	Connector, DC-DC buck, 20-30 V in, 5 V out, 3 A min, 4 pins	1		DC5
-19	Connector, DC-DC buck-boost, 20-30 V in, 19 V out, 40 W min, 4 pins	1		DC19
-20	Connector, DRV8825 (dispenser 1), 6 pins	1		DRV_1
-21	Connector, DRV8825 (dispenser 2), 6 pins	1		DRV_2
-22	Connector, Drive fuse left + holder, 15 A slow-blow, 32 V DC (ATO blade), 2 pins	1		F_MD_L
-23	Connector, Drive fuse right + holder, 15 A slow-blow, 32 V DC (ATO blade), 2 pins	1		F_MD_R
-24	Connector, Drive motor left, E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall, 2 pins	1		M_L
-25	Connector, Drive motor right, E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall, 2 pins	1		M_R
-26	Connector, E-stop (latching, normally closed), Cuts the motor rail only, rated 40 A DC or more, 2 pins	1		ES1
-27	Connector, Headlights, goBILDA 3118-0102-0002, 400 lm, 5-30 V, XT30, 2 pins	1		HEAD
-28	Connector, Jetson Orin Nano dev kit, 6 pins	1		JETSON
-29	Connector, Logic-level MOSFET module (headlights), 4 pins	1		MOSFET
-30	Connector, Main fuse + holder, 40 A, 32 V DC or more, breaking capacity 1000 A or more (MIDI/AMI), 2 pins	1		F1
-31	Connector, Main power switch, Rated 40 A DC or more, 2 pins	1		SW1
-32	Connector, NEMA 17 stepper (dispenser 1), StepperOnline 17HS19-2004S1, 2 A per phase, 4 pins	1		ST_1
-33	Connector, NEMA 17 stepper (dispenser 2), StepperOnline 17HS19-2004S1, 2 A per phase, 4 pins	1		ST_2
-34	Connector, OAK-D Lite (rear), 1 pins	1		CAM_R
-35	Connector, RPLidar A2M8, 1 pins	1		LIDAR
-36	Connector, Raspberry Pi Pico (RP2040), 1 pins	1		PICO
-37	Connector, RealSense D435i (front), 1 pins	1		CAM_F
-38	Connector, SparkFun TB6612FNG dual motor driver (arm), VM 4.5-13.5 V (15 V abs. max), 1.0 A per channel continuous, 3.2 A peak (10 ms), 6 pins	1		AD
-39	Connector, Status LEDs, Seeed Grove WS2813 strip, 30 LEDs, 5 V, 1.8 A max, 2 pins	1		LEDS
-40	Wire, USB 3 cable (A to C), blue	0	m	USB_F, USB_R
-41	Wire, USB cable (A to Micro-USB), black	0	m	USB_P
-42	Wire, USB cable (LiDAR adapter), black	0	m	USB_L
+3	Cable, 1 x 20 AWG	0	m	W_COIL, W_COIL_GND, W_ES_IN
+4	Cable, 2 x 12 AWG	0	m	W_BAT
+5	Cable, 2 x 14 AWG	0	m	W_MD_L, W_MD_R, W_M_L, W_M_R
+6	Cable, 2 x 16 AWG	0	m	W_JETSON
+7	Cable, 2 x 18 AWG	0	m	W_AD, W_DC12_IN, W_DC19_IN, W_DRV_1, W_DRV_2, W_MOSFET
+8	Cable, 2 x 20 AWG	0	m	W_AM_1, W_AM_2, W_DC5_IN, W_HEAD, W_LEDS
+9	Cable, 4 x 22 AWG	0	m	W_ST_1, W_ST_2
+10	Connector, Arm motor 1, Yahboom MD520Z19 (JGB37-520), 12 V, 550 RPM, 0.3 A rated, 3 A stall, 2 pins	1		AM_1
+11	Connector, Arm motor 2, Yahboom MD520Z19 (JGB37-520), 12 V, 550 RPM, 0.3 A rated, 3 A stall, 2 pins	1		AM_2
+12	Connector, Battery, 8S LiFePO4, 25.6 V nominal (20-29.2 V), 10 Ah (256 Wh), 2 pins	1		BAT
+13	Connector, Bus bar / terminal block, Battery after the main switch (not cut by the E-stop), 5 pins	1		BUS_24V
+14	Connector, Bus bar / terminal block, Common ground, 10 pins	1		BUS_GND
+15	Connector, Bus bar / terminal block, Motor rail 24 V (after K1, cut by the E-stop), 7 pins	1		BUS_MOT
+16	Connector, Contactor (cuts the motor rail), Altran ALEV50-C, 50 A DC contacts, 24 V coil, 6 W, 4 pins	1		K1
+17	Connector, Cytron MD10C (drive left), 5-30 V, 13 A continuous, 30 A peak, 4 pins	1		MD_L
+18	Connector, Cytron MD10C (drive right), 5-30 V, 13 A continuous, 30 A peak, 4 pins	1		MD_R
+19	Connector, DC-DC buck (arm rail), 20-30 V in, 12 V out, 6 A min, 4 pins	1		DC12
+20	Connector, DC-DC buck, 20-30 V in, 5 V out, 3 A min, 4 pins	1		DC5
+21	Connector, DC-DC buck-boost, 20-30 V in, 19 V out, 40 W min, 4 pins	1		DC19
+22	Connector, DRV8825 (dispenser 1), 6 pins	1		DRV_1
+23	Connector, DRV8825 (dispenser 2), 6 pins	1		DRV_2
+24	Connector, Drive fuse left + holder, 15 A, 32 V DC (ATO blade, time delay), 2 pins	1		F_MD_L
+25	Connector, Drive fuse right + holder, 15 A, 32 V DC (ATO blade, time delay), 2 pins	1		F_MD_R
+26	Connector, Drive motor left, E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall, 2 pins	1		M_L
+27	Connector, Drive motor right, E-S Motor 36PG-555K-24120-100, 24 V, 120 RPM, 2.6 A rated, 21 A stall, 2 pins	1		M_R
+28	Connector, E-stop (latching, normally closed), SW-EMERG-LED-24V, 2 pins	1		ES1
+29	Connector, Headlights, goBILDA 3118-0102-0002, 400 lm, 5-30 V, XT30, 2 pins	1		HEAD
+30	Connector, Jetson Orin Nano dev kit, 6 pins	1		JETSON
+31	Connector, Logic-level MOSFET module (headlights), 4 pins	1		MOSFET
+32	Connector, Main fuse + holder, 40 A, 58 V DC, 1000 A breaking (JCASE), 2 pins	1		F1
+33	Connector, Main power switch, XT90-S anti-spark loop key, rated 40 A DC or more, 2 pins	1		SW1
+34	Connector, NEMA 17 stepper (dispenser 1), StepperOnline 17HS19-2004S1, 2 A per phase, 4 pins	1		ST_1
+35	Connector, NEMA 17 stepper (dispenser 2), StepperOnline 17HS19-2004S1, 2 A per phase, 4 pins	1		ST_2
+36	Connector, OAK-D Lite (rear), 1 pins	1		CAM_R
+37	Connector, RPLidar A2M8, 1 pins	1		LIDAR
+38	Connector, Raspberry Pi Pico (RP2040), 1 pins	1		PICO
+39	Connector, RealSense D435i (front), 1 pins	1		CAM_F
+40	Connector, SparkFun TB6612FNG dual motor driver (arm), VM 4.5-13.5 V (15 V abs. max), 1.0 A per channel continuous, 3.2 A peak (10 ms), 6 pins	1		AD
+41	Connector, Status LEDs, Seeed Grove WS2813 strip, 30 LEDs, 5 V, 1.8 A max, 2 pins	1		LEDS
+42	Wire, USB 3 cable (A to C), blue	0	m	USB_F, USB_R
+43	Wire, USB cable (A to Micro-USB), black	0	m	USB_P
+44	Wire, USB cable (LiDAR adapter), black	0	m	USB_L

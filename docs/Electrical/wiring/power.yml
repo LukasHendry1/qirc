@@ -29,40 +29,47 @@ connectors:
     notes: XT60 or XT90; BMS rated 40 A continuous or more
   F1:
     type: Main fuse + holder
-    subtype: 40 A, 32 V DC or more, breaking capacity 1000 A or more (MIDI/AMI)
+    subtype: 40 A, 58 V DC, 1000 A breaking (JCASE)
     pinlabels: [IN, OUT]
+    notes: Littelfuse 0895040.Z in holder Littelfuse FHJC1001G
   F_MD_L:
     type: Drive fuse left + holder
-    subtype: 15 A slow-blow, 32 V DC (ATO blade)
+    subtype: 15 A, 32 V DC (ATO blade, time delay)
     pinlabels: [IN, OUT]
-    notes: Protects MD10C left; passes starts and short peaks, blows on a held stall (21 A)
+    notes: Littelfuse 0287015.PXCN in holder 0FHA0002ZXJ. Protects MD10C left; passes starts and short peaks, blows on a held stall (21 A)
   F_MD_R:
     type: Drive fuse right + holder
-    subtype: 15 A slow-blow, 32 V DC (ATO blade)
+    subtype: 15 A, 32 V DC (ATO blade, time delay)
     pinlabels: [IN, OUT]
-    notes: Protects MD10C right; passes starts and short peaks, blows on a held stall (21 A)
+    notes: Littelfuse 0287015.PXCN in holder 0FHA0002ZXJ. Protects MD10C right; passes starts and short peaks, blows on a held stall (21 A)
   SW1:
     type: Main power switch
-    subtype: Rated 40 A DC or more
+    subtype: XT90-S anti-spark loop key, rated 40 A DC or more
     pinlabels: [IN, OUT]
   ES1:
     type: E-stop (latching, normally closed)
-    subtype: Cuts the motor rail only, rated 40 A DC or more
+    subtype: SW-EMERG-LED-24V
     pinlabels: [IN, OUT]
+    notes: Opens the K1 coil circuit; switches only the coil current (0.25 A)
+  K1:
+    type: Contactor (cuts the motor rail)
+    subtype: Altran ALEV50-C, 50 A DC contacts, 24 V coil, 6 W
+    pinlabels: [IN, OUT, COIL+, COIL-]
+    notes: 1N4007 flyback diode across the coil (cathode to COIL+)
 
   # --- Distribution ------------------------------------------------------
   BUS_24V:
     <<: *bus
-    subtype: Unswitched 24 V (after main switch)
-    pinlabels: [IN, TO_E-STOP, TO_19V, TO_5V]
+    subtype: Battery after the main switch (not cut by the E-stop)
+    pinlabels: [IN, TO_K1, TO_19V, TO_5V, TO_E-STOP]
   BUS_MOT:
     <<: *bus
-    subtype: Motor rail 24 V (after E-stop)
+    subtype: Motor rail 24 V (after K1, cut by the E-stop)
     pinlabels: [IN, DRIVE_L, DRIVE_R, TO_12V, STEP_1, STEP_2, LIGHTS]
   BUS_GND:
     <<: *bus
     subtype: Common ground
-    pinlabels: [BAT, DRIVE_L, DRIVE_R, ARM_12V, STEP_1, STEP_2, LIGHTS, 19V, 5V]
+    pinlabels: [BAT, DRIVE_L, DRIVE_R, ARM_12V, STEP_1, STEP_2, LIGHTS, 19V, 5V, K1_COIL]
 
   # --- Regulators and computer -------------------------------------------
   DC19:
@@ -173,7 +180,7 @@ connectors:
     notes: Data line from Pico (signal diagram)
 
 cables:
-  # Main path: battery -> fuse -> switch -> 24 V bus -> E-stop -> motor bus
+  # Main path: battery -> fuse -> switch -> battery bus -> K1 -> motor bus
   W_BAT:
     <<: *red_black
     gauge: 12 AWG
@@ -185,14 +192,27 @@ cables:
     wirecount: 1
     colors: [RD]
     gauge: 12 AWG
+  W_K1_IN:
+    wirecount: 1
+    colors: [RD]
+    gauge: 12 AWG
+  W_K1_OUT:
+    wirecount: 1
+    colors: [RD]
+    gauge: 12 AWG
+  # E-stop and contactor coil
   W_ES_IN:
     wirecount: 1
     colors: [RD]
-    gauge: 12 AWG
-  W_ES_OUT:
+    gauge: 20 AWG
+  W_COIL:
     wirecount: 1
     colors: [RD]
-    gauge: 12 AWG
+    gauge: 20 AWG
+  W_COIL_GND:
+    wirecount: 1
+    colors: [BK]
+    gauge: 20 AWG
 
   # Feeds from the buses (only the drive feeds have their own fuses)
   W_F_MD_L:
@@ -306,11 +326,22 @@ connections:
     - W_SW: [1]
     - BUS_24V: [1]
   - - BUS_24V: [2]
+    - W_K1_IN: [1]
+    - K1: [1]
+  - - K1: [2]
+    - W_K1_OUT: [1]
+    - BUS_MOT: [1]
+
+  # E-stop in series with the K1 coil: pressing it opens K1
+  - - BUS_24V: [5]
     - W_ES_IN: [1]
     - ES1: [1]
   - - ES1: [2]
-    - W_ES_OUT: [1]
-    - BUS_MOT: [1]
+    - W_COIL: [1]
+    - K1: [3]
+  - - K1: [4]
+    - W_COIL_GND: [1]
+    - BUS_GND: [10]
 
   # 19 V for the Jetson (unswitched, stays on during E-stop)
   - - BUS_24V: [3]
