@@ -1,6 +1,6 @@
 # Power schematic (KiCad)
 
-[`qirc_power.kicad_sch`](qirc_power.kicad_sch) is the power distribution drawn as a KiCad 8 schematic: battery, main fuse and switch, the E-stop and contactor, the converters, and every powered part with its wire gauge. It shows the same design as the WireViz diagram in [`../wiring`](../wiring/) ([power.yml](../wiring/power.yml)), laid out as a circuit.
+[`qirc_power.kicad_sch`](qirc_power.kicad_sch) is the power distribution drawn as a KiCad 8 schematic (custom 325 × 220 mm sheet): battery, main fuse and switch, the E-stop and contactor, the converters, and every powered part with its wire gauge. It shows the same design as the WireViz diagram in [`../wiring`](../wiring/) ([power.yml](../wiring/power.yml)), laid out as a circuit.
 
 [PDF](qirc_power.pdf) · [SVG](qirc_power.svg)
 
