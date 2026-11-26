@@ -222,7 +222,7 @@ class Sheet:
         value, or at notes_at (relative to the origin)."""
         self.lib.setdefault(symbol.name, (symbol, ref_prefix))
         self.parts[ref] = (symbol, x, y)
-        self._place(symbol, x, y, ref, value or symbol.name)
+        self._place(symbol, x, y, NAMES[ref], value or symbol.name)
         if notes:
             nx, ny = notes_at if notes_at else (symbol.value_at[0], -symbol.value_at[1] + 1.1)
             self.text(notes, x + nx, y + ny)
@@ -385,7 +385,7 @@ def build():
     s.add('K1', box_symbol('Contactor', ['IN', None, 'COIL+', 'COIL-'], ['OUT'], 10),
           59, 12, value='Altran ALEV50-C, 50 A, 24 V coil', ref_prefix='K')
     s.add('ES1', two_pin('E-stop', ESTOP_GRAPHICS, ref_at=(0, 2.0)), 47, 20, ref_prefix='SW',
-          notes='E-stop (NC)', notes_at=(-2.2, 1.0))
+          notes='NC, latching', notes_at=(-2.2, 1.0))
 
     s.wire(('BAT', 'B+'), ('F_BAT', '1'), gauge=wire12)
     s.wire(('BAT', 'B-'), (19, 14))
@@ -518,6 +518,21 @@ def build():
     return s
 
 
+# Names shown on the sheet for each part (the short IDs are used in the script).
+NAMES = {
+    'BAT': 'BATTERY', 'F_BAT': 'MAIN FUSE', 'SW1': 'POWER SWITCH', 'ES1': 'E-STOP',
+    'K1': 'CONTACTOR',
+    'MD_L': 'MOTOR DRIVER LEFT', 'F_ML': 'FUSE LEFT', 'M_L': 'MOTOR LEFT',
+    'MD_R': 'MOTOR DRIVER RIGHT', 'F_MR': 'FUSE RIGHT', 'M_R': 'MOTOR RIGHT',
+    'DC12': '12V CONVERTER', 'AD': 'ARM DRIVER', 'AM_1': 'ARM MOTOR 1', 'AM_2': 'ARM MOTOR 2',
+    'DRV_1': 'STEPPER DRIVER 1', 'ST_1': 'STEPPER 1',
+    'DRV_2': 'STEPPER DRIVER 2', 'ST_2': 'STEPPER 2',
+    'MOSFET': 'HEADLIGHT SWITCH', 'HEAD': 'HEADLIGHTS',
+    'DC19': '19V CONVERTER', 'JETSON': 'JETSON', 'CAM_F': 'FRONT CAMERA',
+    'CAM_R': 'REAR CAMERA', 'LIDAR': 'LIDAR', 'PICO': 'PICO',
+    'DC5': '5V CONVERTER', 'LEDS': 'STATUS LEDS',
+}
+
 # The intended nets: each is a set of (ref, pin name). The drawn schematic
 # must give exactly these.
 GROUND = {('BAT', 'B-'), ('K1', 'COIL-'), ('MD_L', 'POWER-'), ('MD_R', 'POWER-'),
@@ -563,7 +578,8 @@ def check_netlist(sheet, sch):
     for block in re.findall(r'\(net \(code "\d+"\) \(name "([^"]*)"\)(.*?)\)\s*(?=\(net |\)\s*\)\s*$)',
                             text, re.S):
         nodes = re.findall(r'\(node \(ref "([^"]+)"\) \(pin "([^"]+)"\)', block[1])
-        members = {(r, names[(r, p)]) for r, p in nodes if not r.startswith('#')}
+        ids = {v: k for k, v in NAMES.items()}
+        members = {(ids[r], names[(ids[r], p)]) for r, p in nodes if not r.startswith('#')}
         if members:
             drawn.append((block[0], frozenset(members)))
     want = {frozenset(n) for n in NETS}
