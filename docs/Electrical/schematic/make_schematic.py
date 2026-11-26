@@ -521,7 +521,7 @@ def build():
 # Names shown on the sheet for each part (the short IDs are used in the script).
 NAMES = {
     'BAT': 'BATTERY', 'F_BAT': 'MAIN FUSE', 'SW1': 'POWER SWITCH', 'ES1': 'E-STOP',
-    'K1': 'CONTACTOR',
+    'K1': 'RELAY',
     'MD_L': 'MOTOR DRIVER LEFT', 'F_ML': 'FUSE LEFT', 'M_L': 'MOTOR LEFT',
     'MD_R': 'MOTOR DRIVER RIGHT', 'F_MR': 'FUSE RIGHT', 'M_R': 'MOTOR RIGHT',
     'DC12': '12V CONVERTER', 'AD': 'ARM DRIVER', 'AM_1': 'ARM MOTOR 1', 'AM_2': 'ARM MOTOR 2',
